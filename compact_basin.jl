@@ -8,18 +8,22 @@ t_start = Dates.now() # Save the start time, print the end time later.
 # lav en lille test? se om dit appendede carpet stadig er forbundet til hoved-
 # simulationsobjektet
 
-
-id = "simulation500"    # id of simulation to load
+id = "simulation200"    # id of simulation to load
 N = 20e3                # amount of stress to be applied
-t_comp = 0.2            #compaction max duration [s]
+t_comp = 5.0            # compaction max duration [s]
 
 sim = Granular.readSimulation("$(id)/init.jld2")
 carpet = Granular.readSimulation("$(id)/carpet.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
 
+#mkpath("$(id)/compaction-N$(N)Pa")
 
-sim.id = "compaction-N$(N)Pa_Grains$(SimSettings["ngrains"])"
+cd("$id")
+sim.id = "compaction-N$(N)Pa"
+#sim.id = "$(id)/compaction-N$(N)Pa"
 SimSettings["N"] = N
+
+
 
 Granular.zeroKinematics!(sim)
 
@@ -40,13 +44,13 @@ Granular.addWallLinearFrictionless!(sim, [0., 1.],y_top,
 
 Granular.fitGridToGrains!(sim,sim.ocean)
 
-
 y_bot = Inf
 for grain in sim.grains
     if y_bot > grain.lin_pos[2] - grain.contact_radius
         global y_bot = grain.lin_pos[2] - grain.contact_radius
     end
 end
+
 fixed_thickness = 2. * SimSettings["r_max"]
 for grain in sim.grains
     if grain.lin_pos[2] <= fixed_thickness
@@ -61,10 +65,9 @@ time = Float64[]
 compaction = Float64[]
 effective_normal_stress = Float64[]
 
-
 while sim.time < sim.time_total
 
-    for i = 1:100 #run for a while before measuring the state of the top wall
+    for i = 1:100 # run for a while before measuring the state of the top wall
         Granular.run!(sim, single_step=true)
     end
 
@@ -73,8 +76,6 @@ while sim.time < sim.time_total
     append!(effective_normal_stress, Granular.getWallNormalStress(sim))
 
 end
-
-
 
 defined_normal_stress = (ones(size(effective_normal_stress,1)))
     *(Granular.getWallNormalStress(sim, stress_type="effective"))
@@ -92,5 +93,9 @@ PyPlot.xlabel("Time [s]")
 PyPlot.ylabel("Normal stress [Pa]")
 PyPlot.savefig(sim.id * "-time_vs_compaction-stress.pdf")
 PyPlot.clf()
+
+cd("..")
+
+JLD2.save("simulation$(ngrains)/SimSettings.jld2", SimSettings)
 
 Granular.writeSimulation(sim,filename = "$(id)/comp.jld2")

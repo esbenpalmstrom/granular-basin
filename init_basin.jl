@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-t_start = Dates.now() # Save the start time, print the end time later.
+t_start = Dates.now()           # Save the start time, print the end time later.
 
 ############# Initialization Settings #############
 
@@ -12,13 +12,13 @@ t_stack = 0.5                   # duration for each stack to settle [s]
 
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
-ngrains = 40000                  # total number of grains
-aspect_ratio = 2              #should be x times as wide as it is tall
+ngrains = 200                 # total number of grains
+aspect_ratio = 2                # should be x times as wide as it is tall
 
 stacks = 2                      # number of duplicate stacks on top of the initial grains
 
 ny = sqrt((ngrains)/aspect_ratio)    # number of grain rows
-nx = aspect_ratio*ny*(stacks+1)          # number of grain columns
+nx = aspect_ratio*ny*(stacks+1)      # number of grain columns
 
 ny = Int(round(ny/(stacks+1)))
 nx = Int(round(nx/(stacks+1)))
@@ -54,11 +54,11 @@ SimSettings["r_max"] = r_max
 
 sim = Granular.createSimulation(id="simulation$(ngrains)")
 
-Granular.regularPacking!(sim,       #simulation object
-                        [nx, ny],   #number of grains along x and y axis
-                        r_min,      #smallest grain size
-                        r_max,      #largest grain size
-                        tiling="triangular", #how the grains are tiled
+Granular.regularPacking!(sim,                   #simulation object
+                        [nx, ny],               #number of grains along x and y axis
+                        r_min,                  #smallest grain size
+                        r_max,                  #largest grain size
+                        tiling="triangular",    #how the grains are tiled
                         origo = [0.0,0.0],
                         size_distribution=gsd_type,
                         size_distribution_parameter=gsd_powerlaw_exponent,
@@ -109,8 +109,8 @@ for i = 1:stacks
     global y_top = -Inf
 
     for grain in sim.grains
-        if y_top < grain.lin_pos[2] #+ grain.contact_radius
-            global y_top = grain.lin_pos[2] #+ grain.contact_radius
+        if y_top < grain.lin_pos[2]
+            global y_top = grain.lin_pos[2]
         end
     end
 
@@ -118,9 +118,9 @@ for i = 1:stacks
     # add duplicate grains above the initialized grains
     for grain in temp.grains
 
-        lin_pos_lifted = [0.0,0.0] # preallocation of position of a 'lifted' grain
-        lin_pos_lifted[1] = grain.lin_pos[1] # x position of duplicate grain
-        lin_pos_lifted[2] = grain.lin_pos[2] + y_top + r_max # y-position of duplicate grain
+        lin_pos_lifted = [0.0,0.0]                              # preallocation of position of a 'lifted' grain
+        lin_pos_lifted[1] = grain.lin_pos[1]                    # x position of duplicate grain
+        lin_pos_lifted[2] = grain.lin_pos[2] + y_top + r_max    # y-position of duplicate grain
 
 
         Granular.addGrainCylindrical!(sim,
@@ -226,8 +226,7 @@ Granular.writeSimulation(carpet,
 
 JLD2.save("simulation$(ngrains)/SimSettings.jld2", SimSettings)
 
-
-#print time elapsed
+# print time elapsed
 t_now = Dates.now()
 dur = Dates.canonicalize(t_now-t_start)
 print("Time elapsed: ",dur)
