@@ -8,7 +8,7 @@ t_start = Dates.now() # Save the start time, print the end time later.
 # lav en lille test? se om dit appendede carpet stadig er forbundet til hoved-
 # simulationsobjektet
 
-id = "simulation200"    # id of simulation to load
+id = "simulation1000"    # id of simulation to load
 N = 20e3                # amount of stress to be applied
 t_comp = 5.0            # compaction max duration [s]
 

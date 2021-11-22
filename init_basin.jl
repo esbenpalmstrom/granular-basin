@@ -7,13 +7,16 @@ t_start = Dates.now()           # Save the start time, print the end time later.
 
 ############# Initialization Settings #############
 
-t_init = 1.0                    # duration of initialization [s]
-t_stack = 0.5                   # duration for each stack to settle [s]
+t_init = 0.8                    # duration of initialization [s]
+t_stack = 0.8                   # duration for each stack to settle [s]
 
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
-ngrains = 200                 # total number of grains
-aspect_ratio = 2                # should be x times as wide as it is tall
+ngrains = 40000                  # total number of grains
+aspect_ratio = 4                # should be x times as wide as it is tall
+
+mkpath("simulation$(ngrains)")
+
 
 stacks = 2                      # number of duplicate stacks on top of the initial grains
 
@@ -94,6 +97,10 @@ end
 Granular.setTimeStep!(sim)                  # set appropriate time steps
 Granular.setTotalTime!(sim, t_init)         # set total time
 Granular.setOutputFileInterval!(sim, .01)   # how often vtu files should be outputted
+
+cd("simulation$(ngrains)")
+
+sim.id = "init"
 
 Granular.run!(sim)
 
@@ -212,10 +219,13 @@ Granular.setTotalTime!(sim, 0.5)
 Granular.setTimeStep!(sim)
 Granular.setOutputFileInterval!(sim, .01)
 
+
 Granular.run!(sim)
 
 
 # save the simulation and the carpet objects
+
+cd("..")
 
 Granular.writeSimulation(sim,
                         filename = "simulation$(ngrains)/init.jld2")

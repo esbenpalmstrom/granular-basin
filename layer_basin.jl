@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation200"    # id of simulation to load, just write the folder
+id = "simulation1000"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions
@@ -19,6 +19,13 @@ poissons_ratio = [0.185,0.200,0.185]        # shear stiffness ratio
 tensile_strength = [0.0,0.0,0.0]            # strength of bonds between grains
 contact_dynamic_friction = [0.4,0.4,0.4]    # friction between grains
 rotating = [true,true,true]                 # can grains rotate or not
+
+#mechanical properties for carpet
+carpet_youngs_modulus = 2e7                 # elastic modulus
+carpet_poissons_ratio = 0.185               # shear stiffness ratio
+carpet_tensile_strength = Inf               # strength of bonds between grains
+carpet_contact_dynamic_friction = 0.4       # friction between grains
+carpet_rotating = true                      # can grains rotate or not
 
 sim = Granular.readSimulation("$(id)/comp.jld2")
 carpet = Granular.readSimulation("$(id)/carpet.jld2")
@@ -64,23 +71,23 @@ end
 
 #set the mechanical settings for the carpet
 for grain in carpet.grains
-    grain.youngs_modulus = youngs_modulus[2]
-    grain.poissons_ratio = poissons_ratio[2]
-    grain.tensile_strength = tensile_strength[2]
-    grain.contact_dynamic_friction = contact_dynamic_friction[2]
-    grain.rotating = rotating[2]
+    grain.youngs_modulus = carpet_youngs_modulus
+    grain.poissons_ratio = carpet_poissons_ratio
+    grain.tensile_strength = carpet_tensile_strength
+    grain.contact_dynamic_friction = carpet_contact_dynamic_friction
+    grain.rotating = carpet_rotating
 end
 
-"""
+
 cd("$id")
 sim.id = "layered"
 
 Granular.resetTime!(sim)
-Granular.setTotalTime!(sim,0.3)
+Granular.setTotalTime!(sim,0.05)
 Granular.run!(sim)
 
 cd("..")
-"""
+
 
 Granular.writeSimulation(sim,
                         filename = "$(id)/layered.jld2")
