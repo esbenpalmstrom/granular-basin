@@ -10,7 +10,7 @@ t_start = Dates.now() # Save the start time, print the end time later.
 
 id = "simulation1000"    # id of simulation to load
 N = 20e3                # amount of stress to be applied
-t_comp = 5.0            # compaction max duration [s]
+t_comp = 3.0            # compaction max duration [s]
 
 sim = Granular.readSimulation("$(id)/init.jld2")
 carpet = Granular.readSimulation("$(id)/carpet.jld2")
@@ -22,7 +22,6 @@ cd("$id")
 sim.id = "compaction-N$(N)Pa"
 #sim.id = "$(id)/compaction-N$(N)Pa"
 SimSettings["N"] = N
-
 
 
 Granular.zeroKinematics!(sim)

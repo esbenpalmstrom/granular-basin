@@ -12,7 +12,7 @@ t_stack = 0.8                   # duration for each stack to settle [s]
 
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
-ngrains = 40000                  # total number of grains
+ngrains = 1000                 # total number of grains
 aspect_ratio = 4                # should be x times as wide as it is tall
 
 mkpath("simulation$(ngrains)")
@@ -186,6 +186,7 @@ right_edge = left_edge+length                   # east edge of the carpet
 
 # Now loop over the carpet grain positions, the loop will create grains that overlap slightly
 # in order to create the bonds needed
+# color = 1 is used as a flag for the grains in the carpet
 for i = left_edge+(bot_r/2):bot_r*1.99:left_edge+length
 
     bot_pos = [i,round(sim.ocean.origo[2]-bot_r,digits=2)] # position of grain
@@ -199,7 +200,8 @@ for i = left_edge+(bot_r/2):bot_r*1.99:left_edge+length
                                 shear_strength = Inf,
                                 contact_stiffness_normal = Inf,
                                 contact_stiffness_tangential = Inf,
-                                fixed = true)
+                                fixed = true,
+                                color = 1)
 end
 
 Granular.findContactsAllToAll!(carpet) # find the grain contacts
