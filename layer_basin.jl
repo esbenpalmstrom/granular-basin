@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation1000"    # id of simulation to load, just write the folder
+id = "simulation500"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions
@@ -103,7 +103,7 @@ for grain in sim.grains
     end
 end
 
-Granular.findContactsAllToAll!(carpet) # find the grain contacts
+Granular.findContactsAllToAll!(sim) # find the grain contacts
 
 #reduce the contact radius again
 for i = 1:size(sim.grains,1)
