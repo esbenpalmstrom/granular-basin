@@ -2,23 +2,30 @@ import Granular
 import JLD2
 import Dates
 
+t_start = Dates.now()
+
 
 # User defined settings
 
-id = "simulation1000"   # folder name of simulation
+id = "simulation500"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
 grain_radius = 0.05     # grain radius of grains in indenter
 
-deformation_type = "diapir" # "diapir" or "inversion"
-                            # diapir will only introduce an indenter while
-                            # inversion will also add moving east/west walls
-                            # that follow the contraction of the carpet
+deformation_type = "shortening" # "diapir" or "shortening"
+                                # diapir will only introduce an indenter while
+                                # inversion will also add moving east/west walls
+                                # that follow the contraction of the carpet
 
 t_start = Dates.now()
 
 sim = Granular.readSimulation("$(id)/layered.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
+
+for grain in sim.grains
+    grain.enabled = true
+    grain.fixed = false
+end
 
 # Add Indenter
 temp_indent = Granular.createSimulation("id=temp_indent")
@@ -33,7 +40,6 @@ grain_radius = 0.05
 
 vertex_x = init_vertex_pos[1]
 vertex_y = width*hw_ratio*sin((pi/width)*vertex_x)
-
 
 for i = 0:grain_radius*2:width#manipulate the ocean grid
 
@@ -62,16 +68,36 @@ sim.file_time_since_output_file = 0.
 Granular.setTotalTime!(sim,2.0)
 Granular.setTimeStep!(sim)
 Granular.setOutputFileInterval!(sim, .01)
-
+Granular.resetTime!(sim)
 
 cd("$id")
 sim.id = "deformed"
 
-Granular.resetTime!(sim)
-Granular.setTotalTime!(sim,2.0)
-Granular.run!(sim)
+# Add side walls
+if deformation_Type == true
+    
+end
+
+while sim.time < sim.time_total
+    for grain in sim.grains
+
+        if grain.lin_vel[2] < 0 && grain.color == 1
+            grain.lin_vel[2] = 0
+        end
+    end
+    Granular.run!(sim,single_step = true)
+end
+
+# Granular.resetTime!(sim)
+# Granular.setTotalTime!(sim,2.0)
+# Granular.run!(sim)
 
 cd("..")
 
 Granular.writeSimulation(sim,
                         filename = "$(id)/deformed.jld2")
+
+#print time elapsed
+t_now = Dates.now()
+dur = Dates.canonicalize(t_now-t_start)
+print("Time elapsed: ",dur)
