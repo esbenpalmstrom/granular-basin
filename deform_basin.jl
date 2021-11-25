@@ -75,7 +75,10 @@ sim.id = "deformed"
 
 # Add side walls
 if deformation_Type == true
-    
+
+    #wall facing east
+    Granular.addWallLinearFrictionless!(sim,[1.,0.],e_pos)
+
 end
 
 while sim.time < sim.time_total
