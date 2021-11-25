@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation500"    # id of simulation to load, just write the folder
+id = "simulation1000"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions
@@ -16,8 +16,9 @@ interfaces = [0,0.4,0.6,1]
 # mechanical properties for each layer
 youngs_modulus = [2e7,2e7,2e7]              # elastic modulus
 poissons_ratio = [0.185,0.185,0.185]        # shear stiffness ratio
-tensile_strength = [0.3,0.05,0.3]            # strength of bonds between grains
-contact_dynamic_friction = [0.4,0.4,0.4]    # friction between grains
+tensile_strength = [0.3,0.05,0.3]           # strength of bonds between grains
+shear_strength = [0.3,0.05,0.3]             # shear stregth of bonds
+contact_dynamic_friction = [0.4,0.05,0.4]   # friction between grains
 rotating = [true,true,true]                 # can grains rotate or not
 color = [0,0,0]
 
@@ -26,13 +27,14 @@ carpet_poissons_ratio = 0.185
 carpet_tensile_strength = Inf
 carpet_contact_dynamic_friction = 0.4
 carpet_rotating = true
+carpet_shear_strength = Inf
 
 sim = Granular.readSimulation("$(id)/comp.jld2")
-carpet = Granular.readSimulation("$(id)/carpet.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
 
+sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
+
 Granular.zeroKinematics!(sim)       # end any movement
-Granular.zeroKinematics!(carpet)    # end any movement
 
 y_top = -Inf
 for grain in sim.grains
@@ -72,6 +74,7 @@ for grain in sim.grains
             grain.youngs_modulus = youngs_modulus[i-1]
             grain.poissons_ratio = poissons_ratio[i-1]
             grain.tensile_strength = tensile_strength[i-1]
+            grain.shear_strength = shear_strength[i-1]
             grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
             grain.rotating = rotating[i-1]
             grain.color = color[i-1]
@@ -79,6 +82,7 @@ for grain in sim.grains
             grain.youngs_modulus = carpet_youngs_modulus
             grain.poissons_ratio = carpet_poissons_ratio
             grain.tensile_strength = carpet_tensile_strength
+            grain.shear_strength = carpet_shear_strength
             grain.contact_dynamic_friction = carpet_contact_dynamic_friction
             grain.rotating = carpet_rotating
         end
@@ -103,18 +107,35 @@ for grain in sim.grains
     end
 end
 
-Granular.findContactsAllToAll!(sim) # find the grain contacts
+#Granular.findContactsAllToAll!(sim) # find the grain contacts
+#Granular.run!(sim,single_step=true)
 
 #reduce the contact radius again
 for i = 1:size(sim.grains,1)
     sim.grains[i].contact_radius -= increase_array[i]
 end
 
+"""
+for grain in sim.grains
+    grain.contacts[:] .= 0
+    grain.n_contacts = 0
+end
+
+#vil det ikke være nødvendigt at køre et enkelt timestep her?
+
+for grain in sim.grains
+	for ic=1:size(grain.contact_age,1)
+		grain.contact_age[ic] = 1e16
+	end
+    grain.strength_heal_rate = 1 # new bond stengthening
+end
+"""
+
 cd("$id")
 sim.id = "layered"
 
 Granular.resetTime!(sim)
-Granular.setTotalTime!(sim,0.2)
+Granular.setTotalTime!(sim,1.0)
 Granular.run!(sim)
 
 cd("..")

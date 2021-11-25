@@ -27,6 +27,13 @@ for grain in sim.grains
     grain.fixed = false
 end
 
+y_bot = Inf
+for grain in sim.grains
+    if y_bot > grain.lin_pos[2] - grain.contact_radius
+        global y_bot = grain.lin_pos[2] - grain.contact_radius
+    end
+end
+
 # Add Indenter
 temp_indent = Granular.createSimulation("id=temp_indent")
 
@@ -64,7 +71,12 @@ Granular.fitGridToGrains!(sim,
 
 sim.time_iteration = 0
 sim.time = 0.0
-sim.file_time_since_output_file = 0.
+sim.file_time_since_output_file = 0.y_bot = Inf
+for grain in sim.grains
+    if y_bot > grain.lin_pos[2] - grain.contact_radius
+        global y_bot = grain.lin_pos[2] - grain.contact_radius
+    end
+end
 Granular.setTotalTime!(sim,2.0)
 Granular.setTimeStep!(sim)
 Granular.setOutputFileInterval!(sim, .01)
@@ -72,24 +84,46 @@ Granular.resetTime!(sim)
 
 cd("$id")
 sim.id = "deformed"
-sim.walls = Granular.WallLinear[] # remove existing walls
+sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
 
 
 #find the edge grains of the carpet
+left_edge = -Inf
+right_edge = Inf
+for i = 1:size(sim.grains,1)
+    if left_edge < sim.grains[i].lin_pos[1] + sim.grains[i].contact_radius
+        global left_edge = sim.grains[i].lin_pos[1] + sim.grains[i].contact_radius
+        left_edge_index = deepcopy(i)
+    end
+    if right_edge >sim.grains[i].lin_pos[1] - sim.grains[i].contact_radius
+        global right_edge = sim.grains[i].lin_pos[1] - sim.grains[i].contact_radius
+        right_edge_index = deepcopy(i)
+    end
+end
 
 
-#add walls
-#facing east
-Granular.addWallLinearFrictionless(sim, [-1.,0.]
-                                    )
+#add walls to the east and west
+Granular.addWallLinearFrictionless!(sim,[1.,0.],
+                                    left_edge,
+                                    bc = "fixed")
+
+Granular.addWallLinearFrictionless!(sim,[1.,0.],
+                                    right_edge,
+                                    bc = "fixed")
+
+#add wall beneath the carpet
+
+Granular.addWallLinearFrictionless!(sim, [0.,1.],
+                                    y_bot,
+                                    bc = "fixed")
 
 while sim.time < sim.time_total
-    for grain in sim.grains
-
-        if grain.lin_vel[2] < 0 && grain.color == 1
-            grain.lin_vel[2] = 0
-        end
-    end
+#    for grain in sim.grains
+#
+#        if grain.lin_vel[2] < 0 && grain.color == 1
+#            grain.lin_vel[2] = 0
+#        end
+#    end
     Granular.run!(sim,single_step = true)
 
 end

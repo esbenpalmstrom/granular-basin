@@ -8,12 +8,11 @@ t_start = Dates.now() # Save the start time, print the end time later.
 # lav en lille test? se om dit appendede carpet stadig er forbundet til hoved-
 # simulationsobjektet
 
-id = "simulation500"    # id of simulation to load
+id = "simulation1000"    # id of simulation to load
 N = 20e3                # amount of stress to be applied
 t_comp = 3.0            # compaction max duration [s]
 
 sim = Granular.readSimulation("$(id)/init.jld2")
-carpet = Granular.readSimulation("$(id)/carpet.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
 
 #mkpath("$(id)/compaction-N$(N)Pa")
@@ -98,3 +97,8 @@ cd("..")
 JLD2.save("simulation$(ngrains)/SimSettings.jld2", SimSettings)
 
 Granular.writeSimulation(sim,filename = "$(id)/comp.jld2")
+
+# print time elapsed
+t_now = Dates.now()
+dur = Dates.canonicalize(t_now-t_start)
+print("Time elapsed: ",dur)
