@@ -204,12 +204,22 @@ for i = left_edge+(bot_r/2):bot_r*1.99:left_edge+length
                                 color = 1)
 end
 
-Granular.findContactsAllToAll!(carpet) # find the grain contacts
+for grain in sim.grains
+	for ic=1:length(grain.contact_age)
+		grain.contact_age[ic] = 1e16
+	end
+end
+
 
 append!(sim.grains,carpet.grains) # add the carpet grains to the main simulation object
 # since the assignment will point to the carpet object, changes made to the carpet
 # object will appear in the main simulation object
 
+for grain in sim.grains
+	grain.strength_heal_rate = 1 # new bond stengthening
+end
+
+Granular.findContactsAllToAll!(carpet) # find the grain contacts
 
 Granular.fitGridToGrains!(sim,sim.ocean,verbose=false)  # fit the ocean to the added grains
 
