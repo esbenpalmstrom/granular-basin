@@ -7,7 +7,7 @@ t_start = Dates.now()
 
 # User defined settings
 
-id = "simulation500"   # folder name of simulation
+id = "simulation1000"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
 grain_radius = 0.05     # grain radius of grains in indenter
@@ -72,14 +72,16 @@ Granular.resetTime!(sim)
 
 cd("$id")
 sim.id = "deformed"
+sim.walls = Granular.WallLinear[] # remove existing walls
 
-# Add side walls
-if deformation_Type == true
 
-    #wall facing east
-    Granular.addWallLinearFrictionless!(sim,[1.,0.],e_pos)
+#find the edge grains of the carpet
 
-end
+
+#add walls
+#facing east
+Granular.addWallLinearFrictionless(sim, [-1.,0.]
+                                    )
 
 while sim.time < sim.time_total
     for grain in sim.grains
@@ -89,6 +91,7 @@ while sim.time < sim.time_total
         end
     end
     Granular.run!(sim,single_step = true)
+
 end
 
 # Granular.resetTime!(sim)
