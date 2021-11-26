@@ -4,10 +4,9 @@ import Dates
 
 t_start = Dates.now()
 
-
 # User defined settings
 
-id = "simulation1000"   # folder name of simulation
+id = "simulation500"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
 grain_radius = 0.05     # grain radius of grains in indenter
@@ -27,10 +26,10 @@ for grain in sim.grains
     grain.fixed = false
 end
 
-y_bot = Inf
+y_bot_pre = Inf
 for grain in sim.grains
-    if y_bot > grain.lin_pos[2] - grain.contact_radius
-        global y_bot = grain.lin_pos[2] - grain.contact_radius
+    if y_bot_pre > grain.lin_pos[2] - grain.contact_radius
+        global y_bot_pre = grain.lin_pos[2] - grain.contact_radius
     end
 end
 
@@ -71,7 +70,9 @@ Granular.fitGridToGrains!(sim,
 
 sim.time_iteration = 0
 sim.time = 0.0
-sim.file_time_since_output_file = 0.y_bot = Inf
+sim.file_time_since_output_file = 0.
+
+y_bot = Inf
 for grain in sim.grains
     if y_bot > grain.lin_pos[2] - grain.contact_radius
         global y_bot = grain.lin_pos[2] - grain.contact_radius
@@ -85,7 +86,6 @@ Granular.resetTime!(sim)
 cd("$id")
 sim.id = "deformed"
 sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
-
 
 #find the edge grains of the carpet
 left_edge = -Inf
@@ -101,7 +101,6 @@ for i = 1:size(sim.grains,1)
     end
 end
 
-
 #add walls to the east and west
 Granular.addWallLinearFrictionless!(sim,[1.,0.],
                                     left_edge,
@@ -114,7 +113,7 @@ Granular.addWallLinearFrictionless!(sim,[1.,0.],
 #add wall beneath the carpet
 
 Granular.addWallLinearFrictionless!(sim, [0.,1.],
-                                    y_bot,
+                                    y_bot_pre,
                                     bc = "fixed")
 
 while sim.time < sim.time_total

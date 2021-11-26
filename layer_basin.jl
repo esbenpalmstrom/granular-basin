@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation1000"    # id of simulation to load, just write the folder
+id = "simulation500"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions
@@ -24,10 +24,10 @@ color = [0,0,0]
 
 carpet_youngs_modulus = 2e7
 carpet_poissons_ratio = 0.185
-carpet_tensile_strength = Inf
+carpet_tensile_strength = 1e16
 carpet_contact_dynamic_friction = 0.4
 carpet_rotating = true
-carpet_shear_strength = Inf
+carpet_shear_strength = 1e16
 
 sim = Granular.readSimulation("$(id)/comp.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
@@ -142,6 +142,3 @@ cd("..")
 
 Granular.writeSimulation(sim,
                         filename = "$(id)/layered.jld2")
-
-Granular.writeSimulation(carpet,
-                        filename = "$(id)/carpet.jld2")
