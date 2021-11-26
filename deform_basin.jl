@@ -6,7 +6,7 @@ t_start = Dates.now()
 
 # User defined settings
 
-id = "simulation500"   # folder name of simulation
+id = "simulation250"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
 grain_radius = 0.05     # grain radius of grains in indenter
@@ -115,6 +115,8 @@ Granular.addWallLinearFrictionless!(sim,[1.,0.],
 Granular.addWallLinearFrictionless!(sim, [0.,1.],
                                     y_bot_pre,
                                     bc = "fixed")
+
+
 
 while sim.time < sim.time_total
 #    for grain in sim.grains

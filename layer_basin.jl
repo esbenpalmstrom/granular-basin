@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation500"    # id of simulation to load, just write the folder
+id = "simulation250"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions
@@ -22,12 +22,14 @@ contact_dynamic_friction = [0.4,0.05,0.4]   # friction between grains
 rotating = [true,true,true]                 # can grains rotate or not
 color = [0,0,0]
 
-carpet_youngs_modulus = 2e7
-carpet_poissons_ratio = 0.185
-carpet_tensile_strength = 1e16
-carpet_contact_dynamic_friction = 0.4
-carpet_rotating = true
-carpet_shear_strength = 1e16
+#carpet_youngs_modulus = 2e7
+#carpet_poissons_ratio = 0.185
+#carpet_tensile_strength = 1e16
+#carpet_contact_dynamic_friction = 0.4
+#carpet_rotating = true
+#carpet_shear_strength = 1e16
+
+carpet
 
 sim = Granular.readSimulation("$(id)/comp.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
@@ -78,18 +80,18 @@ for grain in sim.grains
             grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
             grain.rotating = rotating[i-1]
             grain.color = color[i-1]
-        elseif grain.color == 1
-            grain.youngs_modulus = carpet_youngs_modulus
-            grain.poissons_ratio = carpet_poissons_ratio
-            grain.tensile_strength = carpet_tensile_strength
-            grain.shear_strength = carpet_shear_strength
-            grain.contact_dynamic_friction = carpet_contact_dynamic_friction
-            grain.rotating = carpet_rotating
+#        elseif grain.color == 1
+#            grain.youngs_modulus = carpet_youngs_modulus
+#            grain.poissons_ratio = carpet_poissons_ratio
+#            grain.tensile_strength = carpet_tensile_strength
+#            grain.shear_strength = carpet_shear_strength
+#            grain.contact_dynamic_friction = carpet_contact_dynamic_friction
+#            grain.rotating = carpet_rotating
         end
     end
 end
 
-# Create the contacs between grains by expanding all grains by a small amount
+# Create the bonds between grains by expanding all grains by a small amount
 # then search and establish contacts and then reduce the size of the grains again
 
 size_increasing_factor = 1.10   # factor by which contact radius should be increased
@@ -107,6 +109,7 @@ for grain in sim.grains
     end
 end
 
+Granular.findContacts!(sim,method="ocean grid")
 #Granular.findContactsAllToAll!(sim) # find the grain contacts
 #Granular.run!(sim,single_step=true)
 
@@ -115,28 +118,13 @@ for i = 1:size(sim.grains,1)
     sim.grains[i].contact_radius -= increase_array[i]
 end
 
-"""
-for grain in sim.grains
-    grain.contacts[:] .= 0
-    grain.n_contacts = 0
-end
-
-#vil det ikke være nødvendigt at køre et enkelt timestep her?
-
-for grain in sim.grains
-	for ic=1:size(grain.contact_age,1)
-		grain.contact_age[ic] = 1e16
-	end
-    grain.strength_heal_rate = 1 # new bond stengthening
-end
-"""
 
 cd("$id")
 sim.id = "layered"
 
-Granular.resetTime!(sim)
-Granular.setTotalTime!(sim,1.0)
-Granular.run!(sim)
+#Granular.resetTime!(sim)
+#Granular.setTotalTime!(sim,0.5)
+#Granular.run!(sim)
 
 cd("..")
 

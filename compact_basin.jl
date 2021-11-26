@@ -8,7 +8,7 @@ t_start = Dates.now() # Save the start time, print the end time later.
 # lav en lille test? se om dit appendede carpet stadig er forbundet til hoved-
 # simulationsobjektet
 
-id = "simulation500"    # id of simulation to load
+id = "simulation250"    # id of simulation to load
 N = 20e3                # amount of stress to be applied
 t_comp = 3.0            # compaction max duration [s]
 
@@ -49,12 +49,12 @@ for grain in sim.grains
     end
 end
 
-fixed_thickness = 2. * SimSettings["r_max"]
-for grain in sim.grains
-    if grain.lin_pos[2] <= fixed_thickness
-        grain.fixed = true  # set x and y acceleration to zero
-    end
-end
+#fixed_thickness = 2. * SimSettings["r_max"]
+#for grain in sim.grains
+#    if grain.lin_pos[2] <= fixed_thickness
+#        grain.fixed = true  # set x and y acceleration to zero
+#    end
+#end
 
 Granular.resetTime!(sim)
 Granular.setTotalTime!(sim,t_comp)
