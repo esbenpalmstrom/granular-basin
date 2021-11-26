@@ -12,7 +12,7 @@ t_stack = 0.5                   # duration for each stack to settle [s]
 
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
-ngrains = 250                  # total number of grains
+ngrains = 500                  # total number of grains
 aspect_ratio = 4                # should be x times as wide as it is tall
 
 mkpath("simulation$(ngrains)")
@@ -217,9 +217,8 @@ append!(sim.grains,carpet.grains) # add the carpet grains to the main simulation
 # object will appear in the main simulation object
 
 
-
+"""
 #reset the grain contacts and make them very old
-
 
 for grain in sim.grains
     grain.contacts[:] .= 0
@@ -233,7 +232,7 @@ for grain in sim.grains
 	end
     grain.strength_heal_rate = 1 # new bond stengthening
 end
-
+"""
 
 Granular.fitGridToGrains!(sim,sim.ocean,verbose=false)  # fit the ocean to the added grains
 
