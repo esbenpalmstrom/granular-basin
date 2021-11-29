@@ -20,7 +20,7 @@ tensile_strength = [0.3,0.05,0.3]           # strength of bonds between grains
 shear_strength = [0.3,0.05,0.3]             # shear stregth of bonds
 contact_dynamic_friction = [0.4,0.05,0.4]   # friction between grains
 rotating = [true,true,true]                 # can grains rotate or not
-color = [0,0,0]
+color = [1,2,1]
 
 #carpet_youngs_modulus = 2e7
 #carpet_poissons_ratio = 0.185
@@ -58,7 +58,7 @@ end
 """
 for grain in sim.grains
     if grain.lin_pos[2] == -0.05
-        grain.color = 1
+        grain.color = 0
     end
 end
 """
@@ -100,11 +100,11 @@ increase_array = []
 
 #increase the contact radius
 for grain in sim.grains
-    if grain.color == 0
+    if grain.color != 0
         contact_radius_increase = (grain.contact_radius*size_increasing_factor)-grain.contact_radius
         grain.contact_radius += contact_radius_increase
         append!(increase_array,contact_radius_increase)
-    elseif grain.color == 1
+    elseif grain.color == 0
         append!(increase_array,0)
     end
 end

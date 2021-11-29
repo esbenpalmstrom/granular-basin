@@ -10,6 +10,7 @@ id = "simulation500"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
 grain_radius = 0.05     # grain radius of grains in indenter
+def_time = 2.0          # time spent deforming
 
 deformation_type = "shortening" # "diapir" or "shortening"
                                 # diapir will only introduce an indenter while
@@ -47,6 +48,8 @@ grain_radius = 0.05
 vertex_x = init_vertex_pos[1]
 vertex_y = width*hw_ratio*sin((pi/width)*vertex_x)
 
+boomerang_vel = 0.5 # upward velocity of the indeter
+
 for i = 0:grain_radius*2:width#manipulate the ocean grid
 
     x_pos = i
@@ -58,7 +61,8 @@ for i = 0:grain_radius*2:width#manipulate the ocean grid
                                     grain_radius,
                                     0.1,
                                     fixed = true,
-                                    lin_vel = [0.0,0.5])
+                                    lin_vel = [0.0,boomerang_vel],
+                                    color = -1)
 end
 
 append!(sim.grains,temp_indent.grains)
@@ -78,7 +82,7 @@ for grain in sim.grains
         global y_bot = grain.lin_pos[2] - grain.contact_radius
     end
 end
-Granular.setTotalTime!(sim,2.0)
+Granular.setTotalTime!(sim,def_time)
 Granular.setTimeStep!(sim)
 Granular.setOutputFileInterval!(sim, .01)
 Granular.resetTime!(sim)
@@ -93,22 +97,34 @@ right_edge = Inf
 for i = 1:size(sim.grains,1)
     if left_edge < sim.grains[i].lin_pos[1] + sim.grains[i].contact_radius
         global left_edge = sim.grains[i].lin_pos[1] + sim.grains[i].contact_radius
-        left_edge_index = deepcopy(i)
+        global left_edge_index = deepcopy(i)
     end
-    if right_edge >sim.grains[i].lin_pos[1] - sim.grains[i].contact_radius
+    if right_edge > sim.grains[i].lin_pos[1] - sim.grains[i].contact_radius
         global right_edge = sim.grains[i].lin_pos[1] - sim.grains[i].contact_radius
-        right_edge_index = deepcopy(i)
+        global right_edge_index = deepcopy(i)
     end
 end
+
+"""
+carpet_index = []
+# find the center grain of the carpet
+for i = 1:size(sim.grains,1)
+    if sim.grains[i].color == 0
+        append!(carpet_index,i)
+    end
+end
+c_i = size(carpet_index)/2
+"""
+
 
 #add walls to the east and west
 Granular.addWallLinearFrictionless!(sim,[1.,0.],
                                     left_edge,
-                                    bc = "fixed")
+                                    bc = "velocity")
 
 Granular.addWallLinearFrictionless!(sim,[1.,0.],
                                     right_edge,
-                                    bc = "fixed")
+                                    bc = "velocity")
 
 #add wall beneath the carpet
 
@@ -118,13 +134,20 @@ Granular.addWallLinearFrictionless!(sim, [0.,1.],
 
 
 
+
+global checked_done = false
+
 while sim.time < sim.time_total
-#    for grain in sim.grains
-#
-#        if grain.lin_vel[2] < 0 && grain.color == 1
-#            grain.lin_vel[2] = 0
-#        end
-#    end
+
+    if sim.grains[left_edge_index].lin_vel[1] > boomerang_vel/2 && checked_done == false
+        sim.walls[1].vel = boomerang_vel
+        sim.walls[2].vel = -boomerang_vel
+        global checked_done = true
+    end
+
+    #sim.walls[1].vel = sim.grains[left_edge_index].lin_vel[1]
+    #sim.walls[2].vel = -sim.grains[right_edge_index].lin_vel[1]
+
     Granular.run!(sim,single_step = true)
 
 end

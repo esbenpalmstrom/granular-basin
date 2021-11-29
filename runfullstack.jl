@@ -8,4 +8,4 @@ include("deform_basin.jl")
 
 stack_t_now = Dates.now()
 stack_dur = Dates.canonicalize(stack_t_now-stack_t_start)
-print("Time elapsed: ",stack_dur)
+print("Total full stack time elapsed: ",stack_dur)

@@ -186,8 +186,8 @@ right_edge = left_edge+length                   # east edge of the carpet
 
 # Now loop over the carpet grain positions, the loop will create grains that overlap slightly
 # in order to create the bonds needed
-# color = 1 is used as a flag for the grains in the carpet
-for i = left_edge+(bot_r/2):bot_r*1.99:left_edge+length
+# color = 0 is used as a flag for the grains in the carpet
+for i = left_edge+(bot_r/2):bot_r*1.999:left_edge+length
 
     bot_pos = [i,round(sim.ocean.origo[2]-bot_r,digits=2)] # position of grain
 
@@ -201,7 +201,7 @@ for i = left_edge+(bot_r/2):bot_r*1.99:left_edge+length
                                 #contact_stiffness_normal = Inf,
                                 #contact_stiffness_tangential = Inf,
                                 fixed = false,
-                                color = 1)
+                                color = 0)
 end
 
 #Granular.fitGridToGrains!(carpet,carpet.ocean,verbose=false)
