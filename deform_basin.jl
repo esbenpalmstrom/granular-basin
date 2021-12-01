@@ -10,7 +10,7 @@ id = "simulation500"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
 grain_radius = 0.05     # grain radius of grains in indenter
-def_time = 2.0          # time spent deforming
+def_time = 2.0         # time spent deforming
 
 deformation_type = "shortening" # "diapir" or "shortening"
                                 # diapir will only introduce an indenter while
@@ -137,16 +137,19 @@ Granular.addWallLinearFrictionless!(sim, [0.,1.],
 
 global checked_done = false
 
+#sim.walls[1].vel = -boomerang_vel
+#sim.walls[2].vel = boomerang_vel
+
 while sim.time < sim.time_total
 
-    if sim.grains[left_edge_index].lin_vel[1] > boomerang_vel/2 && checked_done == false
-        sim.walls[1].vel = boomerang_vel
-        sim.walls[2].vel = -boomerang_vel
+    if sim.grains[right_edge_index].lin_vel[1] > boomerang_vel/3 && checked_done == false
+        sim.walls[1].vel = -boomerang_vel
+        sim.walls[2].vel = boomerang_vel
         global checked_done = true
     end
 
     #sim.walls[1].vel = sim.grains[left_edge_index].lin_vel[1]
-    #sim.walls[2].vel = -sim.grains[right_edge_index].lin_vel[1]
+    #sim.walls[2].vel = sim.grains[right_edge_index].lin_vel[1]
 
     Granular.run!(sim,single_step = true)
 

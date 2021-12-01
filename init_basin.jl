@@ -12,7 +12,7 @@ t_stack = 0.5                   # duration for each stack to settle [s]
 
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
-ngrains = 500                  # total number of grains
+ngrains = 500                   # total number of grains
 aspect_ratio = 4                # should be x times as wide as it is tall
 
 mkpath("simulation$(ngrains)")
