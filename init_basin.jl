@@ -7,12 +7,12 @@ t_start = Dates.now()           # Save the start time, print the end time later.
 
 ############# Initialization Settings #############
 
-t_init = 0.5                    # duration of initialization [s]
-t_stack = 0.5                   # duration for each stack to settle [s]
+t_init = 1.5                    # duration of initialization [s]
+t_stack = 1.0                   # duration for each stack to settle [s]
 
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
-ngrains = 500                   # total number of grains
+ngrains = 250                   # total number of grains
 aspect_ratio = 4                # should be x times as wide as it is tall
 
 mkpath("simulation$(ngrains)")
@@ -65,7 +65,8 @@ Granular.regularPacking!(sim,                   #simulation object
                         origo = [0.0,0.0],
                         size_distribution=gsd_type,
                         size_distribution_parameter=gsd_powerlaw_exponent,
-                        seed=gsd_seed)
+                        seed=gsd_seed,
+						color = 1)
 
 
 # set the indicated mechanical parameters for all grains

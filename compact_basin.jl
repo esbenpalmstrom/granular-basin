@@ -8,9 +8,9 @@ t_start = Dates.now() # Save the start time, print the end time later.
 # lav en lille test? se om dit appendede carpet stadig er forbundet til hoved-
 # simulationsobjektet
 
-id = "simulation500"    # id of simulation to load
+id = "simulation35000"  # id of simulation to load
 N = 20e3                # amount of stress to be applied
-t_comp = 3.0            # compaction max duration [s]
+t_comp = 15.0            # compaction max duration [s]
 
 sim = Granular.readSimulation("$(id)/init.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
@@ -63,10 +63,23 @@ time = Float64[]
 compaction = Float64[]
 effective_normal_stress = Float64[]
 
+saved5sec = false
+saved10sec = false
+
 while sim.time < sim.time_total
 
     for i = 1:100 # run for a while before measuring the state of the top wall
         Granular.run!(sim, single_step=true)
+    end
+
+    if sim.time > 5.0 && saved5sec == false
+        Granular.writeSimulation(sim,filename = "comp5sec.jld2")
+        global saved5sec = true
+    end
+
+    if sim.time > 10.0 && saved10sec == false
+        Granular.writeSimulation(sim,filename = "comp10sec.jld2")
+        global saved10sec = true
     end
 
     append!(time, sim.time)

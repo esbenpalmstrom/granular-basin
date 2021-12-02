@@ -6,16 +6,26 @@ t_start = Dates.now()
 
 # User defined settings
 
-id = "simulation500"   # folder name of simulation
+id = "simulation250"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
 grain_radius = 0.05     # grain radius of grains in indenter
-def_time = 2.0         # time spent deforming
+def_time = 4.0          # time spent deforming
 
 deformation_type = "shortening" # "diapir" or "shortening"
                                 # diapir will only introduce an indenter while
                                 # inversion will also add moving east/west walls
-                                # that follow the contraction of the carpet
+
+shortening_type = "iterative"       # type of shortening should be "iterative" or "fixed"
+
+shortening_ratio = 0.10         # ratio of shortening of of basin, if shortening_type
+                                # is "fixed". 0.10 would mean basin is shortened by 10%
+
+
+save_type = "iterative"         # "iterative" or "overwrite"
+
+
+
 
 t_start = Dates.now()
 
@@ -48,7 +58,7 @@ grain_radius = 0.05
 vertex_x = init_vertex_pos[1]
 vertex_y = width*hw_ratio*sin((pi/width)*vertex_x)
 
-boomerang_vel = 0.5 # upward velocity of the indeter
+boomerang_vel = 0.2 # upward velocity of the indeter
 
 for i = 0:grain_radius*2:width#manipulate the ocean grid
 
@@ -88,7 +98,19 @@ Granular.setOutputFileInterval!(sim, .01)
 Granular.resetTime!(sim)
 
 cd("$id")
-sim.id = "deformed"
+if save_type == "overwrite"
+    sim.id = "deformed"
+end
+
+if save_type == "iterative"
+    global save_index = 1
+    while isfile("deformed$(save_index).jld2") == true
+        global save_index += 1
+    end
+    sim.id = "deformed$(save_index)"
+end
+
+
 sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
 
 #find the edge grains of the carpet
@@ -142,14 +164,39 @@ global checked_done = false
 
 while sim.time < sim.time_total
 
-    if sim.grains[right_edge_index].lin_vel[1] > boomerang_vel/3 && checked_done == false
-        sim.walls[1].vel = -boomerang_vel
-        sim.walls[2].vel = boomerang_vel
-        global checked_done = true
+    if shortening_type == "iterative"
+        if sim.grains[right_edge_index].lin_vel[1] > boomerang_vel/2 && checked_done == false
+            sim.walls[1].vel = -boomerang_vel
+            sim.walls[2].vel = boomerang_vel
+            global checked_done = true
+        end
+
+        #modulate the speed of the compression walls by the speed of the outer grains
+        if abs(sim.walls[2].vel) > boomerang_vel/2 || abs(sim.walls[2].vel) > abs(sim.grains[right_edge_index].lin_vel[1])*0.98
+            #if boomerang_vel < abs(sim.grains[right_edge_index].lin_vel[1]) || abs(sim.walls[2].vel) > boomerang_vel
+            sim.walls[2].vel *= 0.98
+        end
+        #if abs(sim.walls[2].vel) < abs(sim.grains[right_edge_index].lin_vel[1])*0.90
+        if abs(sim.walls[2].vel) < abs(sim.grains[right_edge_index].lin_vel[1])*0.96
+            sim.walls[2].vel *=1.02
+        end
+
+        #if boomerang_vel < abs(sim.grains[left_edge_index].lin_vel[1]) || abs(sim.walls[1].vel) > boomerang_vel
+        if abs(sim.walls[1].vel) > boomerang_vel/2 || abs(sim.walls[1].vel) > abs(sim.grains[left_edge_index].lin_vel[1])*0.98
+            sim.walls[1].vel *= 0.98
+        end
+        #if abs(sim.walls[1].vel) < abs(sim.grains[left_edge_index].lin_vel[1])*0.90
+        if abs(sim.walls[1].vel) < abs(sim.grains[left_edge_index].lin_vel[1])*0.96
+            sim.walls[1].vel *=1.02
+        end
     end
 
-    #sim.walls[1].vel = sim.grains[left_edge_index].lin_vel[1]
-    #sim.walls[2].vel = sim.grains[right_edge_index].lin_vel[1]
+    if shortening_type == "fixed" && checked_done == false
+        wall_vel = (length*shortening_ratio)/sim.time_total
+        sim.walls[1].vel = -wall_vel/2
+        sim.walls[2].vel = wall_vel/2
+        global checked_done = true
+    end
 
     Granular.run!(sim,single_step = true)
 
@@ -162,7 +209,7 @@ end
 cd("..")
 
 Granular.writeSimulation(sim,
-                        filename = "$(id)/deformed.jld2")
+                        filename = "$(id)/deformed$(save_index).jld2")
 
 #print time elapsed
 t_now = Dates.now()
