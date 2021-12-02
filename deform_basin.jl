@@ -6,11 +6,10 @@ t_start = Dates.now()
 
 # User defined settings
 
-id = "simulation40000"   # folder name of simulation
+id = "simulation500"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
-grain_radius = 0.05     # grain radius of grains in indenter
-def_time = 5.0          # time spent deforming
+def_time = 2.0          # time spent deforming
 
 shortening = true               # true if walls should be introduced. false if only a diapir
 
@@ -48,7 +47,7 @@ temp_indent = Granular.createSimulation("id=temp_indent")
 left_edge = round(sim.ocean.origo[1],digits=2)
 length = round(sim.ocean.L[1],digits=2)
 
-width = length/5
+width = length/3
 hw_ratio = 0.2
 init_vertex_pos = [(length+left_edge)/2,-0.2]
 grain_radius = SimSettings["r_min"]
