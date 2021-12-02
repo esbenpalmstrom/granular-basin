@@ -6,10 +6,10 @@ t_start = Dates.now()
 
 # User defined settings
 
-id = "simulation500"   # folder name of simulation
+id = "simulation40000"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
-def_time = 2.0          # time spent deforming
+def_time = 4.0          # time spent deforming
 
 shortening = true               # true if walls should be introduced. false if only a diapir
 
@@ -21,7 +21,7 @@ shortening_ratio = 0.05         # ratio of shortening of of basin, if shortening
 
 save_type = "iterative"         # "iterative" or "overwrite"
 
-
+boomerang_vel = 0.1 # upward velocity of the indeter
 
 
 t_start = Dates.now()
@@ -48,16 +48,15 @@ left_edge = round(sim.ocean.origo[1],digits=2)
 length = round(sim.ocean.L[1],digits=2)
 
 width = length/3
-hw_ratio = 0.2
 init_vertex_pos = [(length+left_edge)/2,-0.2]
 grain_radius = SimSettings["r_min"]
 
 vertex_x = init_vertex_pos[1]
 vertex_y = width*hw_ratio*sin((pi/width)*vertex_x)
 
-boomerang_vel = 0.1 # upward velocity of the indeter
 
-for i = 0:grain_radius*2:width#manipulate the ocean grid
+
+for i = 0:grain_radius*2:width
 
     x_pos = i
 
