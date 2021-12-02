@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation250"    # id of simulation to load, just write the folder
+id = "simulation40000"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions
@@ -16,9 +16,9 @@ interfaces = [0,0.4,0.6,1]
 # mechanical properties for each layer
 youngs_modulus = [2e7,2e7,2e7]              # elastic modulus
 poissons_ratio = [0.185,0.185,0.185]        # shear stiffness ratio
-tensile_strength = [0.3,0.05,0.3]           # strength of bonds between grains
-shear_strength = [0.3,0.05,0.3]             # shear stregth of bonds
-contact_dynamic_friction = [0.4,0.05,0.4]   # friction between grains
+tensile_strength = [0.3,0.01,0.3]           # strength of bonds between grains
+shear_strength = [0.3,0.01,0.3]             # shear stregth of bonds
+contact_dynamic_friction = [0.4,0.01,0.4]   # friction between grains
 rotating = [true,true,true]                 # can grains rotate or not
 color = [1,2,1]
 
@@ -28,8 +28,6 @@ color = [1,2,1]
 #carpet_contact_dynamic_friction = 0.4
 #carpet_rotating = true
 #carpet_shear_strength = 1e16
-
-carpet
 
 sim = Granular.readSimulation("$(id)/comp.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
@@ -53,15 +51,17 @@ for grain in sim.grains
     end
 end
 
-# quick fix to make the color = 1 flag for grains belonging to the carpet.
+# quick fix to make the color = 0 flag for grains belonging to the carpet.
 # this should be done in the newer versions of init_basin.jl instead
-"""
+
 for grain in sim.grains
     if grain.lin_pos[2] == -0.05
         grain.color = 0
+    else
+        grain.color = 1
     end
 end
-"""
+
 
 h = y_top-y_bot #depth of basin
 
@@ -71,7 +71,7 @@ for grain in sim.grains
 
     for i = 2:size(interfaces,1)
 
-        if grain.lin_pos[2] <= interfaces[i] && grain.lin_pos[2] > interfaces[i-1] && grain.color != 1
+        if grain.lin_pos[2] <= interfaces[i] && grain.lin_pos[2] > interfaces[i-1] && grain.color != 0
 
             grain.youngs_modulus = youngs_modulus[i-1]
             grain.poissons_ratio = poissons_ratio[i-1]
@@ -80,13 +80,7 @@ for grain in sim.grains
             grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
             grain.rotating = rotating[i-1]
             grain.color = color[i-1]
-#        elseif grain.color == 1
-#            grain.youngs_modulus = carpet_youngs_modulus
-#            grain.poissons_ratio = carpet_poissons_ratio
-#            grain.tensile_strength = carpet_tensile_strength
-#            grain.shear_strength = carpet_shear_strength
-#            grain.contact_dynamic_friction = carpet_contact_dynamic_friction
-#            grain.rotating = carpet_rotating
+
         end
     end
 end
@@ -125,6 +119,9 @@ sim.id = "layered"
 #Granular.resetTime!(sim)
 #Granular.setTotalTime!(sim,0.5)
 #Granular.run!(sim)
+
+Granular.resetTime!(sim)
+Granular.run!(sim,single_step=true)
 
 cd("..")
 
