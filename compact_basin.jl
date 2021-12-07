@@ -8,11 +8,14 @@ t_start = Dates.now() # Save the start time, print the end time later.
 
 id = "simulation40000"  # id of simulation to load
 N = 20e3                # amount of stress to be applied
-t_comp = 5.0            # compaction max duration [s]
+t_comp = 15.0            # compaction max duration [s]
+t_rest = 5.0
 
 sim = Granular.readSimulation("$(id)/init.jld2")
 SimSettings = JLD2.load("$(id)/SimSettings.jld2")
 #sim = Granular.readSimulation("$(id)/comp.jld2") #use this if continuing already finished compaction
+
+ngrains = SimSettings["ngrains"]
 
 cd("$id")
 sim.id = "compaction-N$(N)Pa"
@@ -29,7 +32,7 @@ for grain in sim.grains
     end
 end
 
-#sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
+#sim.walls = Granular.WallLinearFrictionless[] # remove existing walls, if already compacted some.
 
 Granular.addWallLinearFrictionless!(sim, [0., 1.],y_top,
                                     bc="normal stress",
@@ -53,9 +56,7 @@ end
 #end
 
 Granular.resetTime!(sim)
-#sim.time_iteration = 0
-#sim.time = 0.0
-#sim.file_time_since_output_file = 0.
+
 Granular.setTotalTime!(sim,t_comp)
 
 time = Float64[]
@@ -64,6 +65,7 @@ effective_normal_stress = Float64[]
 
 saved5sec = false
 saved10sec = false
+
 
 while sim.time < sim.time_total
 
@@ -87,6 +89,9 @@ while sim.time < sim.time_total
 
 end
 
+
+
+
 defined_normal_stress = ones(size(effective_normal_stress,1)) *
     Granular.getWallNormalStress(sim, stress_type="effective")
 
@@ -104,7 +109,20 @@ PyPlot.ylabel("Normal stress [Pa]")
 PyPlot.savefig(sim.id * "-time_vs_compaction-stress.pdf")
 PyPlot.clf()
 
+
+#remove the wall and let the basin rest for a couple of seconds
+sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
+
+sim.time_iteration = 0
+sim.time = 0.0
+sim.file_time_since_output_file = 0.
+Granular.setTotalTime!(sim,t_rest)
+
+Granular.run!(sim)
+
 cd("..")
+
+
 
 JLD2.save("simulation$(ngrains)/SimSettings.jld2", SimSettings)
 

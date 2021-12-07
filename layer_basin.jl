@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation40000"    # id of simulation to load, just write the folder
+id = "simulation250"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions
@@ -116,14 +116,12 @@ end
 cd("$id")
 sim.id = "layered"
 
-#Granular.resetTime!(sim)
-#Granular.setTotalTime!(sim,0.5)
-#Granular.run!(sim)
-
-Granular.resetTime!(sim)
-Granular.run!(sim,single_step=true)
-
 cd("..")
 
 Granular.writeSimulation(sim,
                         filename = "$(id)/layered.jld2")
+
+
+#Granular.resetTime!(sim)
+#Granular.run!(sim,single_step=true) # run for a single step after saving in order to
+                                    # check the layers in paraview

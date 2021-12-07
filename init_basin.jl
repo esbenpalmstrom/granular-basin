@@ -12,8 +12,8 @@ t_stack = 1.0                   # duration for each stack to settle [s]
 
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
-ngrains = 250                   # total number of grains
-aspect_ratio = 4                # should be x times as wide as it is tall
+ngrains = 38000                   # total number of grains
+aspect_ratio = 6                # should be x times as wide as it is tall
 
 mkpath("simulation$(ngrains)")
 
@@ -65,8 +65,7 @@ Granular.regularPacking!(sim,                   #simulation object
                         origo = [0.0,0.0],
                         size_distribution=gsd_type,
                         size_distribution_parameter=gsd_powerlaw_exponent,
-                        seed=gsd_seed,
-						color = 1)
+                        seed=gsd_seed)
 
 
 # set the indicated mechanical parameters for all grains
@@ -76,6 +75,7 @@ for grain in sim.grains
     grain.tensile_strength = tensile_strength
     grain.contact_dynamic_friction = contact_dynamic_friction
     grain.rotating = rotating
+	grain.color = 1
 end
 
 # fit the ocean grid to the grains

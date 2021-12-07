@@ -6,10 +6,10 @@ t_start = Dates.now()
 
 # User defined settings
 
-id = "simulation40000"   # folder name of simulation
+id = "simulation250"   # folder name of simulation
 
 hw_ratio = 0.2          # height/width ratio of indenter
-def_time = 4.0          # time spent deforming
+def_time = 5.0          # time spent deforming
 
 shortening = true               # true if walls should be introduced. false if only a diapir
 
@@ -18,10 +18,11 @@ shortening_type = "fixed"       # type of shortening should be "iterative" or "f
 shortening_ratio = 0.05         # ratio of shortening of of basin, if shortening_type
                                 # is "fixed". 0.10 would mean basin is shortened by 10%
 
-
 save_type = "iterative"         # "iterative" or "overwrite"
+                                # iterative saving, will save an indexed folder
+                                # with files instead of overwriting previous runs
 
-boomerang_vel = 0.1 # upward velocity of the indeter
+boomerang_end_pos = 0.2 # decimal end position. 0.5 would mean the indenter ends in the middle of the basin
 
 
 t_start = Dates.now()
@@ -41,6 +42,15 @@ for grain in sim.grains
     end
 end
 
+y_top = -Inf
+for grain in sim.grains
+    grain.contact_viscosity_normal = 0
+    if y_top < grain.lin_pos[2] + grain.contact_radius
+        global y_top = grain.lin_pos[2] + grain.contact_radius
+    end
+end
+
+
 # Add Indenter
 temp_indent = Granular.createSimulation("id=temp_indent")
 
@@ -54,7 +64,10 @@ grain_radius = SimSettings["r_min"]
 vertex_x = init_vertex_pos[1]
 vertex_y = width*hw_ratio*sin((pi/width)*vertex_x)
 
+boomerang_vel = ((y_top-vertex_y)*boomerang_end_pos)/def_time
 
+
+@info "The indenter will have a velocity of $(boomerang_vel) m/s"
 
 for i = 0:grain_radius*2:width
 
@@ -177,11 +190,12 @@ while sim.time < sim.time_total
             end
         end
 
-        if shortening_type == "fixed" && checked_done == false
+        if shortening_type == "fixed" && checked_done == false #add conditional to only start shortening when indenter deforms?
             wall_vel = (length*shortening_ratio)/sim.time_total
             sim.walls[1].vel = -wall_vel/2
             sim.walls[2].vel = wall_vel/2
             global checked_done = true
+            @info "The shortening walls will have a velocity of $(wall_vel) m/s"
         end
     end
 
