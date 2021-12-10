@@ -1,4 +1,4 @@
-import Granular
+include("../Granular/src/Granular.jl")
 import JLD2
 import PyPlot
 import Dates
