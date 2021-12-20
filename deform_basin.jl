@@ -6,14 +6,14 @@ t_start = Dates.now()
 
 # User defined settings
 
-id = "simulation250"   # folder name of simulation
+id = "simulation40000"   # folder name of simulation
 
-hw_ratio = 0.2          # height/width ratio of indenter
-def_time = 5.0          # time spent deforming
+hw_ratio = 0.12          # height/width ratio of indenter
+def_time = 0.05          # time spent deforming
 
 shortening = true               # true if walls should be introduced. false if only a diapir
 
-shortening_type = "fixed"       # type of shortening should be "iterative" or "fixed"
+shortening_type = "fixed"       # type of shortening should be "iterative", "fixed" or "derivative"
 
 shortening_ratio = 0.05         # ratio of shortening of of basin, if shortening_type
                                 # is "fixed". 0.10 would mean basin is shortened by 10%
@@ -44,12 +44,11 @@ end
 
 y_top = -Inf
 for grain in sim.grains
-    grain.contact_viscosity_normal = 0
+    #grain.contact_viscosity_normal = 0
     if y_top < grain.lin_pos[2] + grain.contact_radius
         global y_top = grain.lin_pos[2] + grain.contact_radius
     end
 end
-
 
 # Add Indenter
 temp_indent = Granular.createSimulation("id=temp_indent")
@@ -57,7 +56,9 @@ temp_indent = Granular.createSimulation("id=temp_indent")
 left_edge = round(sim.ocean.origo[1],digits=2)
 length = round(sim.ocean.L[1],digits=2)
 
-width = length/3
+#width = length/3
+width = length*(4/6)
+
 init_vertex_pos = [(length+left_edge)/2,-0.2]
 grain_radius = SimSettings["r_min"]
 
@@ -65,7 +66,6 @@ vertex_x = init_vertex_pos[1]
 vertex_y = width*hw_ratio*sin((pi/width)*vertex_x)
 
 boomerang_vel = ((y_top-vertex_y)*boomerang_end_pos)/def_time
-
 
 @info "The indenter will have a velocity of $(boomerang_vel) m/s"
 
@@ -82,6 +82,19 @@ for i = 0:grain_radius*2:width
                                     fixed = true,
                                     lin_vel = [0.0,boomerang_vel],
                                     color = -1)
+
+    x_pos = i
+
+    y_pos = width*hw_ratio*sin(pi/width*x_pos)
+
+    Granular.addGrainCylindrical!(temp_indent,
+                                    [x_pos+init_vertex_pos[1]-width/2,y_pos+vertex_y+init_vertex_pos[2]],
+                                    grain_radius,
+                                    0.1,
+                                    fixed = true,
+                                    lin_vel = [0.0,boomerang_vel],
+                                    color = -1)
+
 end
 
 append!(sim.grains,temp_indent.grains)
@@ -113,14 +126,14 @@ end
 
 if save_type == "iterative"
     global save_index = 1
-    while isfile("deformed$(save_index).jld2") == true
+    while isdir("deformed$(save_index)") == true
         global save_index += 1
     end
     sim.id = "deformed$(save_index)"
 end
 
 
-sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
+#sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
 
 #find the edge grains of the carpet
 left_edge = -Inf

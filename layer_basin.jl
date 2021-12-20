@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation250"    # id of simulation to load, just write the folder
+id = "simulation2000"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions
@@ -16,10 +16,9 @@ interfaces = [0,0.4,0.6,1]
 # mechanical properties for each layer
 youngs_modulus = [2e7,2e7,2e7]              # elastic modulus
 poissons_ratio = [0.185,0.185,0.185]        # shear stiffness ratio
-tensile_strength = [0.3,0.01,0.3]           # strength of bonds between grains
-shear_strength = [0.3,0.01,0.3]             # shear stregth of bonds
+tensile_strength = [0.3,0.0,0.3]           # strength of bonds between grains
+shear_strength = [0.3,0.0,0.3]             # shear strength of bonds
 contact_dynamic_friction = [0.4,0.01,0.4]   # friction between grains
-rotating = [true,true,true]                 # can grains rotate or not
 color = [1,2,1]
 
 #carpet_youngs_modulus = 2e7
@@ -34,7 +33,7 @@ SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
 
 sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
 
-Granular.zeroKinematics!(sim)       # end any movement
+#Granular.zeroKinematics!(sim)       # end any movement
 
 y_top = -Inf
 for grain in sim.grains
@@ -90,6 +89,7 @@ end
 
 size_increasing_factor = 1.10   # factor by which contact radius should be increased
                                 # to search for contacts
+size_reduction_factor = -((size_increasing_factor-1)/(1+(size_increasing_factor-1)))
 increase_array = []
 
 #increase the contact radius
@@ -108,9 +108,15 @@ Granular.findContacts!(sim,method="ocean grid")
 #Granular.run!(sim,single_step=true)
 
 #reduce the contact radius again
-for i = 1:size(sim.grains,1)
-    sim.grains[i].contact_radius -= increase_array[i]
+#for i = 1:size(sim.grains,1)
+#    sim.grains[i].contact_radius -= increase_array[i]
+#end
+for grain in sim.grains
+    if grain.color != 0
+        grain.contact_radius = grain.contact_radius + grain.contact_radius*size_reduction_factor
+    end
 end
+
 
 
 cd("$id")
@@ -122,6 +128,8 @@ Granular.writeSimulation(sim,
                         filename = "$(id)/layered.jld2")
 
 
-#Granular.resetTime!(sim)
-#Granular.run!(sim,single_step=true) # run for a single step after saving in order to
+Granular.resetTime!(sim)
+Granular.setTotalTime!(sim,t_rest)
+
+Granular.run!(sim,single_step=true) # run for a single step after saving in order to
                                     # check the layers in paraview

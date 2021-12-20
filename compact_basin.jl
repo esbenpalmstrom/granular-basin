@@ -6,7 +6,7 @@ import Dates
 t_start = Dates.now() # Save the start time, print the end time later.
 
 
-id = "simulation40000"  # id of simulation to load
+id = "simulation2000"  # id of simulation to load
 N = 20e3                # amount of stress to be applied
 t_comp = 15.0            # compaction max duration [s]
 t_rest = 5.0
