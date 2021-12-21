@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation2000"    # id of simulation to load, just write the folder
+id = "simulation40000"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions
@@ -16,9 +16,9 @@ interfaces = [0,0.4,0.6,1]
 # mechanical properties for each layer
 youngs_modulus = [2e7,2e7,2e7]              # elastic modulus
 poissons_ratio = [0.185,0.185,0.185]        # shear stiffness ratio
-tensile_strength = [0.3,0.0,0.3]           # strength of bonds between grains
-shear_strength = [0.3,0.0,0.3]             # shear strength of bonds
-contact_dynamic_friction = [0.4,0.01,0.4]   # friction between grains
+tensile_strength = [0.3,0.01,0.3]           # strength of bonds between grains
+shear_strength = [0.3,0.01,0.3]             # shear strength of bonds
+contact_dynamic_friction = [0.4,0.1,0.4]   # friction between grains
 color = [1,2,1]
 
 #carpet_youngs_modulus = 2e7
@@ -31,7 +31,7 @@ color = [1,2,1]
 sim = Granular.readSimulation("$(id)/comp.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
 
-sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
+#sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
 
 #Granular.zeroKinematics!(sim)       # end any movement
 
@@ -52,7 +52,7 @@ end
 
 # quick fix to make the color = 0 flag for grains belonging to the carpet.
 # this should be done in the newer versions of init_basin.jl instead
-
+"""
 for grain in sim.grains
     if grain.lin_pos[2] == -0.05
         grain.color = 0
@@ -60,7 +60,7 @@ for grain in sim.grains
         grain.color = 1
     end
 end
-
+"""
 
 h = y_top-y_bot #depth of basin
 
@@ -77,7 +77,6 @@ for grain in sim.grains
             grain.tensile_strength = tensile_strength[i-1]
             grain.shear_strength = shear_strength[i-1]
             grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
-            grain.rotating = rotating[i-1]
             grain.color = color[i-1]
 
         end

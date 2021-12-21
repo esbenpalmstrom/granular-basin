@@ -6,10 +6,10 @@ t_start = Dates.now()
 
 # User defined settings
 
-id = "simulation40000"   # folder name of simulation
+id = "simulation40000"          # folder name of simulation
 
-hw_ratio = 0.12          # height/width ratio of indenter
-def_time = 0.05          # time spent deforming
+hw_ratio = 0.12                 # height/width ratio of indenter
+def_time = 5.00                 # time spent deforming
 
 shortening = true               # true if walls should be introduced. false if only a diapir
 
@@ -22,18 +22,19 @@ save_type = "iterative"         # "iterative" or "overwrite"
                                 # iterative saving, will save an indexed folder
                                 # with files instead of overwriting previous runs
 
-boomerang_end_pos = 0.2 # decimal end position. 0.5 would mean the indenter ends in the middle of the basin
+boomerang_end_pos = 0.2         # decimal end position. 0.5 would mean the indenter ends in the middle of the basin
 
 
 t_start = Dates.now()
 
 sim = Granular.readSimulation("$(id)/layered.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
-
+"""
 for grain in sim.grains
     grain.enabled = true
     grain.fixed = false
 end
+"""
 
 y_bot_pre = Inf
 for grain in sim.grains
@@ -59,11 +60,12 @@ length = round(sim.ocean.L[1],digits=2)
 #width = length/3
 width = length*(4/6)
 
-init_vertex_pos = [(length+left_edge)/2,-0.2]
+init_vertex_pos = [(length+left_edge)/2,y_bot_pre-0.2]
 grain_radius = SimSettings["r_min"]
 
 vertex_x = init_vertex_pos[1]
-vertex_y = width*hw_ratio*sin((pi/width)*vertex_x)
+#vertex_y = width*hw_ratio*sin((pi/width)*vertex_x)
+vertex_y = init_vertex_pos[2]
 
 boomerang_vel = ((y_top-vertex_y)*boomerang_end_pos)/def_time
 
@@ -76,19 +78,7 @@ for i = 0:grain_radius*2:width
     y_pos = width*hw_ratio*sin(pi/width*x_pos)
 
     Granular.addGrainCylindrical!(temp_indent,
-                                    [x_pos+init_vertex_pos[1]-width/2,y_pos+vertex_y+init_vertex_pos[2]],
-                                    grain_radius,
-                                    0.1,
-                                    fixed = true,
-                                    lin_vel = [0.0,boomerang_vel],
-                                    color = -1)
-
-    x_pos = i
-
-    y_pos = width*hw_ratio*sin(pi/width*x_pos)
-
-    Granular.addGrainCylindrical!(temp_indent,
-                                    [x_pos+init_vertex_pos[1]-width/2,y_pos+vertex_y+init_vertex_pos[2]],
+                                    [x_pos+init_vertex_pos[1]-width/2,y_pos-(width*hw_ratio)+init_vertex_pos[2]],
                                     grain_radius,
                                     0.1,
                                     fixed = true,
