@@ -18,8 +18,8 @@ youngs_modulus = [2e7,2e7,2e7]              # elastic modulus
 poissons_ratio = [0.185,0.185,0.185]        # shear stiffness ratio
 tensile_strength = [0.3,0.01,0.3]           # strength of bonds between grains
 shear_strength = [0.3,0.01,0.3]             # shear strength of bonds
-contact_dynamic_friction = [0.4,0.1,0.4]   # friction between grains
-color = [1,2,1]
+contact_dynamic_friction = [0.4,0.1,0.4]    # friction between grains
+color = [1,2,1]                             # colors
 
 #carpet_youngs_modulus = 2e7
 #carpet_poissons_ratio = 0.185

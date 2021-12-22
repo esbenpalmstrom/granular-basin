@@ -1,34 +1,233 @@
 import Granular
 import JLD2
 import Dates
+import PyPlot
+using ArgParse
 
 t_start = Dates.now()
 
-# User defined settings
-
-id = "simulation40000"          # folder name of simulation
-
-hw_ratio = 0.12                 # height/width ratio of indenter
-def_time = 5.00                 # time spent deforming
-
-shortening = true               # true if walls should be introduced. false if only a diapir
-
-shortening_type = "fixed"       # type of shortening should be "iterative", "fixed" or "derivative"
-
-shortening_ratio = 0.05         # ratio of shortening of of basin, if shortening_type
-                                # is "fixed". 0.10 would mean basin is shortened by 10%
-
-save_type = "iterative"         # "iterative" or "overwrite"
-                                # iterative saving, will save an indexed folder
-                                # with files instead of overwriting previous runs
-
-boomerang_end_pos = 0.2         # decimal end position. 0.5 would mean the indenter ends in the middle of the basin
+# User defined settings strictly
+"""
+simnr = 500
+hw_ratio = 0.12
+def_time = 5.00
+shortening = true
+shortening_type = "fixed" # "fixed" or "derivate"
+shortening_ratio = 0.05
+boomerang_end_pos 0.2
+"""
 
 
-t_start = Dates.now()
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table! s begin
+
+        "sim_nr"
+            help = "documentation here"
+            arg_type = Int
+            #required = true
+            default = 500
+        "hw_ratio"
+            help = "documentation here"
+            arg_type = Float64
+            #required = true
+            default = 0.12
+        "def_time"
+            help = "documentation here"
+            arg_type = Float64
+            #required = true
+            default = 5.00
+        "shortening"
+            help = "documentation here"
+            arg_type = Bool
+            #required = true
+            default = true
+        "shortening_type"
+            help = "documentation here"
+            arg_type = String
+            #required = true
+            default = "fixed"
+        "shortening_ratio"
+            help = "documentation here"
+            arg_type = Float64
+            #required = true
+            default = 0.05
+        "boomerang_end_pos"
+            help = "documentation here"
+            arg_type = Float64
+            #required = true
+            default = 0.20
+        "interfaces"
+            help = "Documentation here"
+            arg_type = Vector{Float64}
+            default = [0,0.4,0.6,1]
+        "youngs_modulus"
+            help = "Documentation here"
+            arg_type = Vector{Float64}
+            default = [2e7,2e7,2e7]
+        "poissons_ratio"
+            help = "Documentation here"
+            arg_type = Vector{Float64}
+            default = [0.185,0.185,0.185]
+        "tensile_strength"
+            help = "doc here"
+            arg_type = Vector{Float64}
+            default = [0.3,0.01,0.3]
+        "shear_strength"
+            help = "doc"
+            arg_type = Vector{Float64}
+            default = [0.3,0.01,0.3]
+        "contact_dynamic_friction"
+            help = "doc here"
+            arg_type = Vector{Float64}
+            default = [0.4,0.1,0.4]
+        "color"
+            help = "doc here"
+            arg_type = Vector{Int}
+            default = [1,2,1]
+        "t_rest"
+            help = "doc here"
+            arg_type = Float64
+            default = 5.0
+
+    end
+
+    return parse_args(s)
+end
+
+function main()
+    parsed_args = parse_commandline()
+    println("Parsed args:")
+    for (arg,val) in parsed_args
+        println("  $arg  =>  $val")
+    end
+end
+
+main()
+
+parsed_args = parse_commandline()
+#unpack the dict containing parsed args
+sim_nr = parsed_args["sim_nr"]
+hw_ratio = parsed_args["hw_ratio"]
+def_time = parsed_args["def_time"]
+shortening = parsed_args["shortening"]
+shortening_type = parsed_args["shortening_type"]
+shortening_ratio = parsed_args["shortening_ratio"]
+boomerang_end_pos = parsed_args["boomerang_end_pos"]
+interfaces = parsed_args["interfaces"]
+youngs_modulus = parsed_args["youngs_modulus"]
+poissons_ratio = parsed_args["poissons_ratio"]
+tensile_strength = parsed_args["tensile_strength"]
+shear_strength = parsed_args["shear_strength"]
+contact_dynamic_friction = parsed_args["contact_dynamic_friction"]
+color = parsed_args["color"]
+t_rest = parsed_args["t_rest"]
+
+id = "simulation$(sim_nr)"
+
+# ************************ Layering phase ************************
+
+sim = Granular.readSimulation("$(id)/comp.jld2")
+SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
+
+y_top = -Inf
+for grain in sim.grains
+    grain.contact_viscosity_normal = 0
+    if y_top < grain.lin_pos[2] + grain.contact_radius
+        global y_top = grain.lin_pos[2] + grain.contact_radius
+    end
+end
+
+y_bot = Inf
+for grain in sim.grains
+    if y_bot > grain.lin_pos[2] - grain.contact_radius
+        global y_bot = grain.lin_pos[2] - grain.contact_radius
+    end
+end
+
+h = y_top-y_bot #depth of basin
+
+interfaces *= h
+
+for grain in sim.grains
+
+    for i = 2:size(interfaces,1)
+
+        if grain.lin_pos[2] <= interfaces[i] && grain.lin_pos[2] > interfaces[i-1] && grain.color != 0
+
+            grain.youngs_modulus = youngs_modulus[i-1]
+            grain.poissons_ratio = poissons_ratio[i-1]
+            grain.tensile_strength = tensile_strength[i-1]
+            grain.shear_strength = shear_strength[i-1]
+            grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
+            grain.color = color[i-1]
+
+        end
+    end
+end
+
+
+cd("$id")
+sim.id = "layered"
+
+cd("..")
+
+Granular.resetTime!(sim)
+Granular.setTotalTime!(sim,t_rest)
+
+Granular.run!(sim) # run for a single step after saving in order to
+                                    # check the layers in paraview
+
+
+# Create the bonds between grains by expanding all grains by a small amount
+# then search and establish contacts and then reduce the size of the grains again
+
+size_increasing_factor = 1.10   # factor by which contact radius should be increased
+                                # to search for contacts
+size_reduction_factor = -((size_increasing_factor-1)/(1+(size_increasing_factor-1)))
+increase_array = []
+
+#increase the contact radius
+for grain in sim.grains
+    if grain.color != 0
+        contact_radius_increase = (grain.contact_radius*size_increasing_factor)-grain.contact_radius
+        grain.contact_radius += contact_radius_increase
+        append!(increase_array,contact_radius_increase)
+    elseif grain.color == 0
+        append!(increase_array,0)
+    end
+end
+
+ranular.findContacts!(sim,method="ocean grid")
+#Granular.findContactsAllToAll!(sim) # find the grain contacts
+#Granular.run!(sim,single_step=true)
+
+#reduce the contact radius again
+#for i = 1:size(sim.grains,1)
+#    sim.grains[i].contact_radius -= increase_array[i]
+#end
+for grain in sim.grains
+    if grain.color != 0
+        grain.contact_radius = grain.contact_radius + grain.contact_radius*size_reduction_factor
+    end
+end
+
+
+Granular.writeSimulation(sim,
+                        filename = "$(id)/layered.jld2")
+
+
+
+
+
+# ************************ Deformation phase ************************
+
+save_type = "iterative"
 
 sim = Granular.readSimulation("$(id)/layered.jld2")
-SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
+
+
 """
 for grain in sim.grains
     grain.enabled = true
