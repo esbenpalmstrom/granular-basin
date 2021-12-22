@@ -1,4 +1,4 @@
-import Granular
+include("Granular/src/Granular.jl")
 import JLD2
 import Dates
 import PyPlot
@@ -6,7 +6,6 @@ using ArgParse
 
 t_start = Dates.now()
 
-# User defined settings strictly
 """
 simnr = 500
 hw_ratio = 0.12
@@ -27,7 +26,7 @@ function parse_commandline()
             help = "documentation here"
             arg_type = Int
             #required = true
-            default = 500
+            default = 1000
         "hw_ratio"
             help = "documentation here"
             arg_type = Float64
@@ -107,6 +106,8 @@ end
 main()
 
 parsed_args = parse_commandline()
+
+
 #unpack the dict containing parsed args
 sim_nr = parsed_args["sim_nr"]
 hw_ratio = parsed_args["hw_ratio"]
@@ -146,9 +147,17 @@ for grain in sim.grains
     end
 end
 
-h = y_top-y_bot #depth of basin
 
+#Create a color layering scheme that respect the geological layers
+
+color_interfaces = collect(range(0,1,length=11))
+
+
+h = y_top-y_bot
+color_interfaces = collect(range(0,1,length=11))*h
+colors = [10,20,10,20,10,20,10,20,10,20,10]
 interfaces *= h
+
 
 for grain in sim.grains
 
@@ -163,21 +172,34 @@ for grain in sim.grains
             grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
             grain.color = color[i-1]
 
+            for j = 2:size(color_interfaces,1)
+
+                if grain.lin_pos[2] <= color_interfaces[j] && grain.lin_pos[2] > color_interfaces[i-1]
+
+                    grain.color = color[i-1] + colors[j-1]
+
+                end
+            end
+
+
         end
     end
 end
+"""
+for grain in sim.grains
+
+    for i = 2:size(color_interfaces,1)
+
+        if grain.lin_pos[2] <= color_interfaces[i] && grain.lin_pos[2] > color_interfaces[i-1] && grain.color != 0
+
+            grain.color += colors[i-1]
+
+        end
+    end
+end
+"""
 
 
-cd("$id")
-sim.id = "layered"
-
-cd("..")
-
-Granular.resetTime!(sim)
-Granular.setTotalTime!(sim,t_rest)
-
-Granular.run!(sim) # run for a single step after saving in order to
-                                    # check the layers in paraview
 
 
 # Create the bonds between grains by expanding all grains by a small amount
@@ -199,7 +221,7 @@ for grain in sim.grains
     end
 end
 
-ranular.findContacts!(sim,method="ocean grid")
+Granular.findContacts!(sim,method="ocean grid")
 #Granular.findContactsAllToAll!(sim) # find the grain contacts
 #Granular.run!(sim,single_step=true)
 
@@ -213,6 +235,15 @@ for grain in sim.grains
     end
 end
 
+cd("$id")
+sim.id = "layered"
+
+Granular.resetTime!(sim)
+Granular.setTotalTime!(sim,t_rest)
+
+Granular.run!(sim)
+
+cd("..")
 
 Granular.writeSimulation(sim,
                         filename = "$(id)/layered.jld2")
@@ -353,8 +384,6 @@ Granular.addWallLinearFrictionless!(sim,[1.,0.],
 Granular.addWallLinearFrictionless!(sim, [0.,1.],
                                     y_bot_pre,
                                     bc = "fixed")
-
-
 
 
 global checked_done = false
