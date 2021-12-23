@@ -26,7 +26,7 @@ function parse_commandline()
             help = "documentation here"
             arg_type = Int
             #required = true
-            default = 1000
+            default = 500
         "hw_ratio"
             help = "documentation here"
             arg_type = Float64
