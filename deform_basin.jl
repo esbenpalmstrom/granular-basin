@@ -26,7 +26,7 @@ function parse_commandline()
             help = "documentation here"
             arg_type = Int
             #required = true
-            default = 500
+            default = 600
         "hw_ratio"
             help = "documentation here"
             arg_type = Float64
@@ -53,43 +53,110 @@ function parse_commandline()
             #required = true
             default = 0.05
         "boomerang_end_pos"
-            help = "documentation here"
+            help = "Set to 0.0 if you want no inversion"
             arg_type = Float64
             #required = true
             default = 0.20
-        "interfaces"
-            help = "Documentation here"
-            arg_type = Vector{Float64}
-            default = [0,0.4,0.6,1]
-        "youngs_modulus"
-            help = "Documentation here"
-            arg_type = Vector{Float64}
-            default = [2e7,2e7,2e7]
-        "poissons_ratio"
-            help = "Documentation here"
-            arg_type = Vector{Float64}
-            default = [0.185,0.185,0.185]
-        "tensile_strength"
+        #"interfaces"
+        #    help = "Documentation here"
+        #    arg_type = Vector{Float64}
+        #    default = [0.0,0.4,0.6,1.0]
+        "weak_bot"
             help = "doc here"
-            arg_type = Vector{Float64}
-            default = [0.3,0.01,0.3]
-        "shear_strength"
-            help = "doc"
-            arg_type = Vector{Float64}
-            default = [0.3,0.01,0.3]
-        "contact_dynamic_friction"
+            arg_type = Float64
+            default = 0.4
+        "weak_top"
             help = "doc here"
-            arg_type = Vector{Float64}
-            default = [0.4,0.1,0.4]
-        "color"
+            arg_type = Float64
+            default = 0.6
+        #"youngs_modulus"
+        #    help = "Documentation here"
+        #    arg_type = Vector{Float64}
+        #    default = [2e7,2e7,2e7]
+        "strong_youngs_modulus"
             help = "doc here"
-            arg_type = Vector{Int}
-            default = [1,2,1]
+            arg_type = Float64
+            default = 2e7
+        "weak_youngs_modulus"
+            help = "doc here"
+            arg_type = Float64
+            default = 2e7
+        #"poissons_ratio"
+        #    help = "Documentation here"
+        #    arg_type = Vector{Float64}
+        #    default = [0.185,0.185,0.185]
+        "strong_poissons_ratio"
+            help = "doc here"
+            arg_type = Float64
+            default = 0.185
+        "weak_poissons_ratio"
+            help = "doc here"
+            arg_type = Float64
+            default = 0.185
+        #"tensile_strength"
+        #    help = "doc here"
+        #    arg_type = Vector{Float64}
+        #    default = [0.3,0.01,0.3]
+        "strong_tensile_strength"
+            help = "doc here"
+            arg_type = Float64
+            default = 0.3
+        "weak_tensile_strength"
+            help = "doc here"
+            arg_type = Float64
+            default = 0.01
+        #"shear_strength"
+        #    help = "doc"
+        #    arg_type = Vector{Float64}
+        #    default = [0.3,0.01,0.3]
+        "strong_shear_strength"
+            help = "doc here"
+            arg_type = Float64
+            default = 0.3
+        "weak_shear_strength"
+            help = "doc here"
+            arg_type = Float64
+            default = 0.01
+        #"contact_dynamic_friction"
+        #    help = "doc here"
+        #    arg_type = Vector{Float64}
+        #    default = [0.4,0.1,0.4]
+        "strong_contact_dynamic_friction"
+            help = "doc here"
+            arg_type = Float64
+            default = 0.4
+        "weak_contact_dynamic_friction"
+            help = "doc here"
+            arg_type = Float64
+            default = 0.1
+        #"color"
+        #    help = "doc here"
+        #    arg_type = Vector{Int}
+        #    default = [1,2,1]
+        "strong_color"
+            help = "doc here"
+            arg_type = Int
+            default = 1
+        "weak_color"
+            help = "doc here"
+            arg_type = Int
+            default = 2
         "t_rest"
             help = "doc here"
             arg_type = Float64
             default = 5.0
-
+        #"density"
+        #    help = "doc here"
+        #    arg_type = Vector{Float64}
+        #    default = [2650.0,2650.0,2650.0]
+        "strong_density"
+            help = "doc here"
+            arg_type = Float64
+            default = 934.0
+        "weak_density"
+            help = "doc here"
+            arg_type = Float64
+            default = 934.0
     end
 
     return parse_args(s)
@@ -116,14 +183,32 @@ shortening = parsed_args["shortening"]
 shortening_type = parsed_args["shortening_type"]
 shortening_ratio = parsed_args["shortening_ratio"]
 boomerang_end_pos = parsed_args["boomerang_end_pos"]
-interfaces = parsed_args["interfaces"]
-youngs_modulus = parsed_args["youngs_modulus"]
-poissons_ratio = parsed_args["poissons_ratio"]
-tensile_strength = parsed_args["tensile_strength"]
-shear_strength = parsed_args["shear_strength"]
-contact_dynamic_friction = parsed_args["contact_dynamic_friction"]
-color = parsed_args["color"]
+#interfaces = parsed_args["interfaces"]
+interfaces = [0.0,parsed_args["weak_bot"],parsed_args["weak_top"],1.0]
+
+#youngs_modulus = parsed_args["youngs_modulus"]
+youngs_modulus = [parsed_args["strong_youngs_modulus"],parsed_args["weak_youngs_modulus"],parsed_args["strong_youngs_modulus"]]
+
+#poissons_ratio = parsed_args["poissons_ratio"]
+poissons_ratio = [parsed_args["strong_poissons_ratio"],parsed_args["weak_poissons_ratio"],parsed_args["strong_poissons_ratio"]]
+
+#tensile_strength = parsed_args["tensile_strength"]
+tensile_strength = [parsed_args["strong_tensile_strength"],parsed_args["weak_tensile_strength"],parsed_args["strong_tensile_strength"]]
+
+#shear_strength = parsed_args["shear_strength"]
+shear_strength = [parsed_args["strong_shear_strength"],parsed_args["weak_shear_strength"],parsed_args["strong_shear_strength"]]
+
+#contact_dynamic_friction = parsed_args["contact_dynamic_friction"]
+contact_dynamic_friction = [parsed_args["strong_contact_dynamic_friction"],parsed_args["weak_contact_dynamic_friction"],parsed_args["strong_contact_dynamic_friction"]]
+
+#color = parsed_args["color"]
+color = [parsed_args["strong_color"],parsed_args["weak_color"],parsed_args["strong_color"]]
+
 t_rest = parsed_args["t_rest"]
+
+#density = parsed_args["density"]
+density = [parsed_args["strong_density"],parsed_args["weak_density"],parsed_args["strong_density"]]
+
 
 id = "simulation$(sim_nr)"
 
@@ -131,6 +216,14 @@ id = "simulation$(sim_nr)"
 
 sim = Granular.readSimulation("$(id)/comp.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
+
+# quick fix to color everything except the carpet as color = 1
+# for some older initiated assemblies, this needs to be done
+for grain in sim.grains
+    if grain.lin_pos[2] != -0.05
+        grain.color = 1
+    end
+end
 
 y_top = -Inf
 for grain in sim.grains
@@ -154,8 +247,8 @@ color_interfaces = collect(range(0,1,length=11))
 
 
 h = y_top-y_bot
-color_interfaces = collect(range(0,1,length=11))*h
-colors = [10,20,10,20,10,20,10,20,10,20,10]
+color_interfaces = collect(range(0,1,length=16))*h
+colors = [10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20]
 interfaces *= h
 
 
@@ -172,32 +265,22 @@ for grain in sim.grains
             grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
             grain.color = color[i-1]
 
-            for j = 2:size(color_interfaces,1)
-
-                if grain.lin_pos[2] <= color_interfaces[j] && grain.lin_pos[2] > color_interfaces[i-1]
-
-                    grain.color = color[i-1] + colors[j-1]
-
-                end
-            end
-
-
         end
     end
 end
-"""
+
 for grain in sim.grains
 
-    for i = 2:size(color_interfaces,1)
+    for j = 2:size(color_interfaces,1)
 
-        if grain.lin_pos[2] <= color_interfaces[i] && grain.lin_pos[2] > color_interfaces[i-1] && grain.color != 0
+        if grain.lin_pos[2] <= color_interfaces[j] && grain.lin_pos[2] > color_interfaces[j-1] && grain.color != 0
 
-            grain.color += colors[i-1]
+            grain.color += colors[j-1]
 
         end
     end
 end
-"""
+
 
 
 
@@ -235,8 +318,22 @@ for grain in sim.grains
     end
 end
 
+
 cd("$id")
-sim.id = "layered"
+
+
+save_type = "iterative"
+
+if save_type == "iterative"
+    global save_index = 1
+    while isdir("layered$(save_index)") == true
+        global save_index += 1
+    end
+    sim.id = "layered$(save_index)"
+end
+
+
+
 
 Granular.resetTime!(sim)
 Granular.setTotalTime!(sim,t_rest)
@@ -246,7 +343,7 @@ Granular.run!(sim)
 cd("..")
 
 Granular.writeSimulation(sim,
-                        filename = "$(id)/layered.jld2")
+                        filename = "$(id)/layered$(save_index).jld2")
 
 
 
@@ -254,17 +351,17 @@ Granular.writeSimulation(sim,
 
 # ************************ Deformation phase ************************
 
-save_type = "iterative"
+
 
 sim = Granular.readSimulation("$(id)/layered.jld2")
 
 
-"""
+
 for grain in sim.grains
     grain.enabled = true
     grain.fixed = false
 end
-"""
+
 
 y_bot_pre = Inf
 for grain in sim.grains
@@ -344,13 +441,7 @@ if save_type == "overwrite"
     sim.id = "deformed"
 end
 
-if save_type == "iterative"
-    global save_index = 1
-    while isdir("deformed$(save_index)") == true
-        global save_index += 1
-    end
-    sim.id = "deformed$(save_index)"
-end
+sim.id = "deformed$(save_index)"
 
 
 #sim.walls = Granular.WallLinearFrictionless[] # remove existing walls

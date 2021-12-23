@@ -3,7 +3,7 @@ import JLD2
 import PyPlot
 import Dates
 
-id = "simulation40000"    # id of simulation to load, just write the folder
+id = "simulation600"    # id of simulation to load, just write the folder
                         # name here
 
 # Layer interface positions

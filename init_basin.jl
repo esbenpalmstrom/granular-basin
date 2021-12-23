@@ -14,7 +14,7 @@ t_stack = 1.0                   # duration for each stack to settle [s]
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
 ngrains = 600                   # total number of grains
-aspect_ratio = 10                # should be x times as wide as it is tall
+aspect_ratio = 6                # should be x times as wide as it is tall
 
 mkpath("simulation$(ngrains)")
 
@@ -209,9 +209,7 @@ end
 #Granular.fitGridToGrains!(carpet,carpet.ocean,verbose=false)
 
 
-
 Granular.findContactsAllToAll!(carpet) # find the grain contacts
-
 
 
 append!(sim.grains,carpet.grains) # add the carpet grains to the main simulation object
