@@ -36,7 +36,7 @@ function parse_commandline()
             help = "documentation here"
             arg_type = Float64
             #required = true
-            default = 5.00
+            default = 10.00
         "shortening"
             help = "documentation here"
             arg_type = Bool
