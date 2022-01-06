@@ -353,7 +353,7 @@ Granular.writeSimulation(sim,
 
 
 
-sim = Granular.readSimulation("$(id)/layered.jld2")
+sim = Granular.readSimulation("$(id)/layered$(save_index).jld2")
 
 
 
