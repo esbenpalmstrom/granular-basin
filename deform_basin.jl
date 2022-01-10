@@ -271,15 +271,14 @@ cd("$id")
 
 save_type = "iterative"
 
-"""
-if save_type == "iterative"
-    global save_index = 1
-    while isdir("layered$(save_index)") == true
-        global save_index += 1
-    end
-    sim.id = "layered$(save_index)"
-end
-"""
+#if save_type == "iterative"
+#    global save_index = 1
+#    while isdir("layered$(save_index)") == true
+#        global save_index += 1
+#    end
+#    sim.id = "layered$(save_index)"
+#end
+sim.id = "layered$(id_number)"
 
 
 
