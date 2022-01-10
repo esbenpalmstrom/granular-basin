@@ -6,16 +6,6 @@ using ArgParse
 
 t_start = Dates.now()
 
-"""
-simnr = 500
-hw_ratio = 0.12
-def_time = 5.00
-shortening = true
-shortening_type = "fixed" # "fixed" or "derivate"
-shortening_ratio = 0.05
-boomerang_end_pos 0.2
-"""
-
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -23,140 +13,112 @@ function parse_commandline()
     @add_arg_table! s begin
 
         "sim_nr"
-            help = "documentation here"
+            help = "the number identifying the simulation, usually close to the number of grains the simulation"
             arg_type = Int
             #required = true
             default = 600
         "hw_ratio"
-            help = "documentation here"
+            help = "height to width ratio of the indeter. Ratio of 0.2 would make height 20% of the width"
             arg_type = Float64
             #required = true
             default = 0.12
         "def_time"
-            help = "documentation here"
+            help = "Time to stretch the deformation phase over. Shorter deformation time will give faster deformation"
             arg_type = Float64
             #required = true
             default = 10.00
         "shortening"
-            help = "documentation here"
+            help = "Shortening with side walls can be turned on of off (true/false)"
             arg_type = Bool
             #required = true
             default = true
         "shortening_type"
-            help = "documentation here"
+            help = "Type of shortening. 'Fixed' will make the walls move in with constant given velocity"
             arg_type = String
             #required = true
             default = "fixed"
         "shortening_ratio"
-            help = "documentation here"
+            help = "The amount of shortening of the basin. 0.05 will give a 5% shortening by the end of the deformation phase"
             arg_type = Float64
             #required = true
             default = 0.05
         "boomerang_end_pos"
-            help = "Set to 0.0 if you want no inversion"
+            help = "End position of the indenter relative to the height of the basin, 0.2 will make the indenter move up 20% of the height of the basin.Set to 0.0 if you want no inversion."
             arg_type = Float64
             #required = true
             default = 0.20
-        #"interfaces"
-        #    help = "Documentation here"
-        #    arg_type = Vector{Float64}
-        #    default = [0.0,0.4,0.6,1.0]
         "weak_bot"
-            help = "doc here"
+            help = "Bottom decimal position of the weak layer"
             arg_type = Float64
             default = 0.4
         "weak_top"
-            help = "doc here"
+            help = "Top decimal position of the weak layer"
             arg_type = Float64
             default = 0.6
-        #"youngs_modulus"
-        #    help = "Documentation here"
-        #    arg_type = Vector{Float64}
-        #    default = [2e7,2e7,2e7]
         "strong_youngs_modulus"
-            help = "doc here"
+            help = "YM of the strong layer"
             arg_type = Float64
             default = 2e7
         "weak_youngs_modulus"
-            help = "doc here"
+            help = "YM of the weak layer"
             arg_type = Float64
             default = 2e7
-        #"poissons_ratio"
-        #    help = "Documentation here"
-        #    arg_type = Vector{Float64}
-        #    default = [0.185,0.185,0.185]
         "strong_poissons_ratio"
-            help = "doc here"
+            help = "PR of the strong layer"
             arg_type = Float64
             default = 0.185
         "weak_poissons_ratio"
-            help = "doc here"
+            help = "PR of the weak layer"
             arg_type = Float64
             default = 0.185
-        #"tensile_strength"
-        #    help = "doc here"
-        #    arg_type = Vector{Float64}
-        #    default = [0.3,0.01,0.3]
         "strong_tensile_strength"
-            help = "doc here"
+            help = "Tensile strength of the strong layer"
             arg_type = Float64
             default = 0.3
         "weak_tensile_strength"
-            help = "doc here"
+            help = "Tensile strength of the weak layer"
             arg_type = Float64
             default = 0.01
-        #"shear_strength"
-        #    help = "doc"
-        #    arg_type = Vector{Float64}
-        #    default = [0.3,0.01,0.3]
         "strong_shear_strength"
-            help = "doc here"
+            help = "Shear strength of the strong layer"
             arg_type = Float64
             default = 0.3
         "weak_shear_strength"
-            help = "doc here"
+            help = "Tensile strength of the weak layer"
             arg_type = Float64
             default = 0.01
-        #"contact_dynamic_friction"
-        #    help = "doc here"
-        #    arg_type = Vector{Float64}
-        #    default = [0.4,0.1,0.4]
         "strong_contact_dynamic_friction"
-            help = "doc here"
+            help = "Friction coefficient of grains in strong layer"
             arg_type = Float64
             default = 0.4
         "weak_contact_dynamic_friction"
-            help = "doc here"
+            help = "Friction coefficient of grains in the weak layer"
             arg_type = Float64
             default = 0.1
-        #"color"
-        #    help = "doc here"
-        #    arg_type = Vector{Int}
-        #    default = [1,2,1]
         "strong_color"
-            help = "doc here"
+            help = "Color coding of grains in the strong layer"
             arg_type = Int
             default = 1
         "weak_color"
-            help = "doc here"
+            help = "Color coding of grains in the weak layer"
             arg_type = Int
             default = 2
         "t_rest"
-            help = "doc here"
+            help = "Time for the basin to rest after layering but before the deformation phase."
             arg_type = Float64
             default = 5.0
-        #"density"
-        #    help = "doc here"
-        #    arg_type = Vector{Float64}
-        #    default = [2650.0,2650.0,2650.0]
         "strong_density"
-            help = "doc here"
+            help = "Density of the strong layer"
             arg_type = Float64
             default = 934.0
         "weak_density"
-            help = "doc here"
+            help = "Density of the weak layer"
             arg_type = Float64
             default = 934.0
+        "simulation_id"
+            help = "number identifier of the simulation. fx. 1, 2, 3 or 4"
+            arg_type = Int
+            required = true
     end
 
     return parse_args(s)
@@ -183,32 +145,16 @@ shortening = parsed_args["shortening"]
 shortening_type = parsed_args["shortening_type"]
 shortening_ratio = parsed_args["shortening_ratio"]
 boomerang_end_pos = parsed_args["boomerang_end_pos"]
-#interfaces = parsed_args["interfaces"]
 interfaces = [0.0,parsed_args["weak_bot"],parsed_args["weak_top"],1.0]
-
-#youngs_modulus = parsed_args["youngs_modulus"]
 youngs_modulus = [parsed_args["strong_youngs_modulus"],parsed_args["weak_youngs_modulus"],parsed_args["strong_youngs_modulus"]]
-
-#poissons_ratio = parsed_args["poissons_ratio"]
 poissons_ratio = [parsed_args["strong_poissons_ratio"],parsed_args["weak_poissons_ratio"],parsed_args["strong_poissons_ratio"]]
-
-#tensile_strength = parsed_args["tensile_strength"]
 tensile_strength = [parsed_args["strong_tensile_strength"],parsed_args["weak_tensile_strength"],parsed_args["strong_tensile_strength"]]
-
-#shear_strength = parsed_args["shear_strength"]
 shear_strength = [parsed_args["strong_shear_strength"],parsed_args["weak_shear_strength"],parsed_args["strong_shear_strength"]]
-
-#contact_dynamic_friction = parsed_args["contact_dynamic_friction"]
 contact_dynamic_friction = [parsed_args["strong_contact_dynamic_friction"],parsed_args["weak_contact_dynamic_friction"],parsed_args["strong_contact_dynamic_friction"]]
-
-#color = parsed_args["color"]
 color = [parsed_args["strong_color"],parsed_args["weak_color"],parsed_args["strong_color"]]
-
 t_rest = parsed_args["t_rest"]
-
-#density = parsed_args["density"]
 density = [parsed_args["strong_density"],parsed_args["weak_density"],parsed_args["strong_density"]]
-
+id_number = parsed_args["simulation_id"]
 
 id = "simulation$(sim_nr)"
 
@@ -324,6 +270,7 @@ cd("$id")
 
 save_type = "iterative"
 
+"""
 if save_type == "iterative"
     global save_index = 1
     while isdir("layered$(save_index)") == true
@@ -331,7 +278,7 @@ if save_type == "iterative"
     end
     sim.id = "layered$(save_index)"
 end
-
+"""
 
 
 
@@ -343,7 +290,7 @@ Granular.run!(sim)
 cd("..")
 
 Granular.writeSimulation(sim,
-                        filename = "$(id)/layered$(save_index).jld2")
+                        filename = "$(id)/layered$(id_number).jld2")
 
 
 
@@ -353,7 +300,7 @@ Granular.writeSimulation(sim,
 
 
 
-sim = Granular.readSimulation("$(id)/layered$(save_index).jld2")
+#sim = Granular.readSimulation("$(id)/layered$(save_index).jld2")
 
 
 
@@ -441,7 +388,7 @@ if save_type == "overwrite"
     sim.id = "deformed"
 end
 
-sim.id = "deformed$(save_index)"
+sim.id = "deformed$(id_number)"
 
 
 #sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
@@ -528,7 +475,7 @@ end
 cd("..")
 
 Granular.writeSimulation(sim,
-                        filename = "$(id)/deformed$(save_index).jld2")
+                        filename = "$(id)/deformed$(id_number).jld2")
 
 #print time elapsed
 t_now = Dates.now()
