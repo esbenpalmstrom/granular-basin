@@ -297,7 +297,7 @@ if skip_layering == false
 
     Granular.resetTime!(sim)
     Granular.setTotalTime!(sim,t_rest)
-    Granular.setOutputFileInterval!(sim, .02) #changed from 0.01
+    Granular.setOutputFileInterval!(sim, .05) #changed from 0.01
 
     Granular.run!(sim)
 
@@ -315,6 +315,8 @@ end
 
 if skip_layering == true
     sim = Granular.readSimulation("$(id)/layered$(layer_id).jld2")
+elseif skip_layering == false
+    sim = Granular.readSimulation("$(id)/layered$(id_number).jld2")
 end
 
 #for grain in sim.grains
@@ -393,7 +395,7 @@ for grain in sim.grains
 end
 Granular.setTotalTime!(sim,def_time)
 Granular.setTimeStep!(sim)
-Granular.setOutputFileInterval!(sim, .02) #changed from 0.01
+Granular.setOutputFileInterval!(sim, .05) #changed from 0.01
 Granular.resetTime!(sim)
 
 cd("$id")
