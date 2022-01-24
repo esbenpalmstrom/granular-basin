@@ -119,6 +119,14 @@ function parse_commandline()
             help = "Density of the weak layer"
             arg_type = Float64
             default = 934.0
+        "skip_layering"
+            help = "true if layering should be skipped, in that case the id of layered sim must be given"
+            arg_type = Bool
+            default = false
+        "layer_id"
+            help = "id of layered sim if layering is skipped"
+            arg_type = Int
+            default = 1
 
     end
 
@@ -156,158 +164,163 @@ color = [parsed_args["strong_color"],parsed_args["weak_color"],parsed_args["stro
 t_rest = parsed_args["t_rest"]
 density = [parsed_args["strong_density"],parsed_args["weak_density"],parsed_args["strong_density"]]
 id_number = parsed_args["simulation_id"]
+skip_layering = parsed_args["skip_layering"]
+layer_id = parsed_args["layer_id"]
 
 id = "simulation$(sim_nr)"
 
-# ************************ Layering phase ************************
-
-sim = Granular.readSimulation("$(id)/comp.jld2")
 SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
 
-# quick fix to color everything except the carpet as color = 1
-# for some older initiated assemblies, this needs to be done
-for grain in sim.grains
-    if grain.lin_pos[2] != -0.05
-        grain.color = 1
-    end
-end
+# ************************ Layering phase ************************
 
-y_top = -Inf
-for grain in sim.grains
-    grain.contact_viscosity_normal = 0
-    if y_top < grain.lin_pos[2] + grain.contact_radius
-        global y_top = grain.lin_pos[2] + grain.contact_radius
-    end
-end
-
-y_bot = Inf
-for grain in sim.grains
-    if y_bot > grain.lin_pos[2] - grain.contact_radius
-        global y_bot = grain.lin_pos[2] - grain.contact_radius
-    end
-end
+if skip_layering == false
+    sim = Granular.readSimulation("$(id)/comp.jld2")
 
 
-#Create a color layering scheme that respect the geological layers
-
-color_interfaces = collect(range(0,1,length=11))
-
-
-h = y_top-y_bot
-color_interfaces = collect(range(0,1,length=16))*h
-colors = [10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20]
-interfaces *= h
-
-
-for grain in sim.grains
-
-    for i = 2:size(interfaces,1)
-
-        if grain.lin_pos[2] <= interfaces[i] && grain.lin_pos[2] > interfaces[i-1] && grain.color != 0
-
-            grain.youngs_modulus = youngs_modulus[i-1]
-            grain.poissons_ratio = poissons_ratio[i-1]
-            grain.tensile_strength = tensile_strength[i-1]
-            grain.shear_strength = shear_strength[i-1]
-            grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
-            grain.color = color[i-1]
-
+    # quick fix to color everything except the carpet as color = 1
+    # for some older initiated assemblies, this needs to be done
+    for grain in sim.grains
+        if grain.lin_pos[2] != -0.05
+            grain.color = 1
         end
     end
-end
 
-for grain in sim.grains
-
-    for j = 2:size(color_interfaces,1)
-
-        if grain.lin_pos[2] <= color_interfaces[j] && grain.lin_pos[2] > color_interfaces[j-1] && grain.color != 0
-
-            grain.color += colors[j-1]
-
+    y_top = -Inf
+    for grain in sim.grains
+        grain.contact_viscosity_normal = 0
+        if y_top < grain.lin_pos[2] + grain.contact_radius
+            global y_top = grain.lin_pos[2] + grain.contact_radius
         end
     end
-end
 
-
-
-
-
-# Create the bonds between grains by expanding all grains by a small amount
-# then search and establish contacts and then reduce the size of the grains again
-
-size_increasing_factor = 1.10   # factor by which contact radius should be increased
-                                # to search for contacts
-size_reduction_factor = -((size_increasing_factor-1)/(1+(size_increasing_factor-1)))
-increase_array = []
-
-#increase the contact radius
-for grain in sim.grains
-    if grain.color != 0
-        contact_radius_increase = (grain.contact_radius*size_increasing_factor)-grain.contact_radius
-        grain.contact_radius += contact_radius_increase
-        append!(increase_array,contact_radius_increase)
-    elseif grain.color == 0
-        append!(increase_array,0)
+    y_bot = Inf
+    for grain in sim.grains
+        if y_bot > grain.lin_pos[2] - grain.contact_radius
+            global y_bot = grain.lin_pos[2] - grain.contact_radius
+        end
     end
-end
 
-Granular.findContacts!(sim,method="ocean grid")
-#Granular.findContactsAllToAll!(sim) # find the grain contacts
-#Granular.run!(sim,single_step=true)
 
-#reduce the contact radius again
-#for i = 1:size(sim.grains,1)
-#    sim.grains[i].contact_radius -= increase_array[i]
-#end
-for grain in sim.grains
-    if grain.color != 0
-        grain.contact_radius = grain.contact_radius + grain.contact_radius*size_reduction_factor
+    #Create a color layering scheme that respect the geological layers
+
+    color_interfaces = collect(range(0,1,length=11))
+
+
+    h = y_top-y_bot
+    color_interfaces = collect(range(0,1,length=16))*h
+    colors = [10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20]
+    interfaces *= h
+
+
+    for grain in sim.grains
+
+        for i = 2:size(interfaces,1)
+
+            if grain.lin_pos[2] <= interfaces[i] && grain.lin_pos[2] > interfaces[i-1] && grain.color != 0
+
+                grain.youngs_modulus = youngs_modulus[i-1]
+                grain.poissons_ratio = poissons_ratio[i-1]
+                grain.tensile_strength = tensile_strength[i-1]
+                grain.shear_strength = shear_strength[i-1]
+                grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
+                grain.color = color[i-1]
+
+            end
+        end
     end
+
+    for grain in sim.grains
+
+        for j = 2:size(color_interfaces,1)
+
+            if grain.lin_pos[2] <= color_interfaces[j] && grain.lin_pos[2] > color_interfaces[j-1] && grain.color != 0
+
+                grain.color += colors[j-1]
+
+            end
+        end
+    end
+
+
+
+
+
+    # Create the bonds between grains by expanding all grains by a small amount
+    # then search and establish contacts and then reduce the size of the grains again
+
+    size_increasing_factor = 1.10   # factor by which contact radius should be increased
+    # to search for contacts
+    size_reduction_factor = -((size_increasing_factor-1)/(1+(size_increasing_factor-1)))
+    increase_array = []
+
+    #increase the contact radius
+    for grain in sim.grains
+        if grain.color != 0
+            contact_radius_increase = (grain.contact_radius*size_increasing_factor)-grain.contact_radius
+            grain.contact_radius += contact_radius_increase
+            append!(increase_array,contact_radius_increase)
+        elseif grain.color == 0
+            append!(increase_array,0)
+        end
+    end
+
+    Granular.findContacts!(sim,method="ocean grid")
+    #Granular.findContactsAllToAll!(sim) # find the grain contacts
+    #Granular.run!(sim,single_step=true)
+
+    #reduce the contact radius again
+    #for i = 1:size(sim.grains,1)
+    #    sim.grains[i].contact_radius -= increase_array[i]
+    #end
+    for grain in sim.grains
+        if grain.color != 0
+            grain.contact_radius = grain.contact_radius + grain.contact_radius*size_reduction_factor
+        end
+    end
+
+
+    cd("$id")
+
+
+    save_type = "iterative"
+
+    #if save_type == "iterative"
+    #    global save_index = 1
+    #    while isdir("layered$(save_index)") == true
+    #        global save_index += 1
+    #    end
+    #    sim.id = "layered$(save_index)"
+    #end
+    sim.id = "layered$(id_number)"
+
+
+
+    Granular.resetTime!(sim)
+    Granular.setTotalTime!(sim,t_rest)
+    Granular.setOutputFileInterval!(sim, .02) #changed from 0.01
+
+    Granular.run!(sim)
+
+    cd("..")
+
+    Granular.writeSimulation(sim,
+    filename = "$(id)/layered$(id_number).jld2")
+
 end
-
-
-cd("$id")
-
-
-save_type = "iterative"
-
-#if save_type == "iterative"
-#    global save_index = 1
-#    while isdir("layered$(save_index)") == true
-#        global save_index += 1
-#    end
-#    sim.id = "layered$(save_index)"
-#end
-sim.id = "layered$(id_number)"
-
-
-
-Granular.resetTime!(sim)
-Granular.setTotalTime!(sim,t_rest)
-
-Granular.run!(sim)
-
-cd("..")
-
-Granular.writeSimulation(sim,
-                        filename = "$(id)/layered$(id_number).jld2")
-
-
-
-
-
 # ************************ Deformation phase ************************
 
 
 
-#sim = Granular.readSimulation("$(id)/layered$(save_index).jld2")
+#sim = Granular.readSimulation("$(id)/layered$(id_number).jld2")
 
-
-
-for grain in sim.grains
-    grain.enabled = true
-    grain.fixed = false
+if skip_layering == true
+    sim = Granular.readSimulation("$(id)/layered$(layer_id).jld2")
 end
+
+#for grain in sim.grains
+#    grain.enabled = true
+#    grain.fixed = false
+#end
 
 
 y_bot_pre = Inf
@@ -380,13 +393,13 @@ for grain in sim.grains
 end
 Granular.setTotalTime!(sim,def_time)
 Granular.setTimeStep!(sim)
-Granular.setOutputFileInterval!(sim, .01)
+Granular.setOutputFileInterval!(sim, .02) #changed from 0.01
 Granular.resetTime!(sim)
 
 cd("$id")
-if save_type == "overwrite"
-    sim.id = "deformed"
-end
+#if save_type == "overwrite"
+#    sim.id = "deformed"
+#end
 
 sim.id = "deformed$(id_number)"
 
