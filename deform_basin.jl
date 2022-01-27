@@ -169,7 +169,7 @@ layer_id = parsed_args["layer_id"]
 
 id = "simulation$(sim_nr)"
 
-SimSettings = SimSettings = JLD2.load("$(id)/SimSettings.jld2")
+SimSettings = JLD2.load("$(id)/SimSettings.jld2")
 
 # ************************ Layering phase ************************
 
