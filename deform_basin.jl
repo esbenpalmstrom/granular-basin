@@ -319,10 +319,10 @@ elseif skip_layering == false
     sim = Granular.readSimulation("$(id)/layered$(id_number).jld2")
 end
 
-#for grain in sim.grains
-#    grain.enabled = true
-#    grain.fixed = false
-#end
+for grain in sim.grains
+    grain.enabled = true
+    grain.fixed = false
+end
 
 
 y_bot_pre = Inf
