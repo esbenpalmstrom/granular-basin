@@ -12,125 +12,129 @@ function parse_commandline()
 
     @add_arg_table! s begin
 
-        "simulation_id"
-            help = "number identifier of the simulation. fx. 1, 2, 3 or 4"
-            arg_type = Int
-            required = true
-        "sim_nr"
-            help = "the number identifying the simulation, usually close to the number of grains the simulation"
-            arg_type = Int
-            #required = true
-            default = 600
-        "hw_ratio"
-            help = "height to width ratio of the indeter. Ratio of 0.2 would make height 20% of the width"
-            arg_type = Float64
-            #required = true
-            default = 0.12
-        "def_time"
-            help = "Time to stretch the deformation phase over. Shorter deformation time will give faster deformation"
-            arg_type = Float64
-            #required = true
-            default = 10.00
-        "shortening"
-            help = "Shortening with side walls can be turned on of off (true/false)"
-            arg_type = Bool
-            #required = true
-            default = true
-        "shortening_type"
-            help = "Type of shortening. 'Fixed' will make the walls move in with constant given velocity"
-            arg_type = String
-            #required = true
-            default = "fixed"
-        "shortening_ratio"
-            help = "The amount of shortening of the basin. 0.05 will give a 5% shortening by the end of the deformation phase"
-            arg_type = Float64
-            #required = true
-            default = 0.05
-        "boomerang_end_pos"
-            help = "End position of the indenter relative to the height of the basin, 0.2 will make the indenter move up 20% of the height of the basin.Set to 0.0 if you want no inversion."
-            arg_type = Float64
-            #required = true
-            default = 0.20
-        "weak_bot"
-            help = "Bottom decimal position of the weak layer"
-            arg_type = Float64
-            default = 0.4
-        "weak_top"
-            help = "Top decimal position of the weak layer"
-            arg_type = Float64
-            default = 0.6
-        "strong_youngs_modulus"
-            help = "YM of the strong layer"
-            arg_type = Float64
-            default = 2e7
-        "weak_youngs_modulus"
-            help = "YM of the weak layer"
-            arg_type = Float64
-            default = 2e7
-        "strong_poissons_ratio"
-            help = "PR of the strong layer"
-            arg_type = Float64
-            default = 0.185
-        "weak_poissons_ratio"
-            help = "PR of the weak layer"
-            arg_type = Float64
-            default = 0.185
-        "strong_tensile_strength"
-            help = "Tensile strength of the strong layer"
-            arg_type = Float64
-            default = 0.3
-        "weak_tensile_strength"
-            help = "Tensile strength of the weak layer"
-            arg_type = Float64
-            default = 0.01
-        "strong_shear_strength"
-            help = "Shear strength of the strong layer"
-            arg_type = Float64
-            default = 0.3
-        "weak_shear_strength"
-            help = "Tensile strength of the weak layer"
-            arg_type = Float64
-            default = 0.01
-        "strong_contact_dynamic_friction"
-            help = "Friction coefficient of grains in strong layer"
-            arg_type = Float64
-            default = 0.4
-        "weak_contact_dynamic_friction"
-            help = "Friction coefficient of grains in the weak layer"
-            arg_type = Float64
-            default = 0.1
-        "strong_color"
-            help = "Color coding of grains in the strong layer"
-            arg_type = Int
-            default = 1
-        "weak_color"
-            help = "Color coding of grains in the weak layer"
-            arg_type = Int
-            default = 2
-        "t_rest"
-            help = "Time for the basin to rest after layering but before the deformation phase."
-            arg_type = Float64
-            default = 5.0
-        "strong_density"
-            help = "Density of the strong layer"
-            arg_type = Float64
-            default = 934.0
-        "weak_density"
-            help = "Density of the weak layer"
-            arg_type = Float64
-            default = 934.0
-        "skip_layering"
-            help = "true if layering should be skipped, in that case the id of layered sim must be given"
-            arg_type = Bool
-            default = false
-        "layer_id"
-            help = "id of layered sim if layering is skipped"
-            arg_type = Int
-            default = 1
+    "simulation_id"
+    help = "number identifier of the simulation. fx. 1, 2, 3 or 4"
+    arg_type = Int
+    required = true
+    "sim_nr"
+    help = "the number identifying the simulation, usually close to the number of grains in the simulation"
+    arg_type = Int
+    #required = true
+    default = 600
+    "hw_ratio"
+    help = "height to width ratio of the indeter. Ratio of 0.2 would make height 20% of the width"
+    arg_type = Float64
+    #required = true
+    default = 0.12
+    "def_time"
+    help = "Time to stretch the deformation phase over. Shorter deformation time will give faster deformation"
+    arg_type = Float64
+    #required = true
+    default = 10.00
+    "shortening"
+    help = "Shortening with side walls can be turned on of off (true/false)"
+    arg_type = Bool
+    #required = true
+    default = true
+    "shortening_type"
+    help = "Type of shortening. 'Fixed' will make the walls move in with constant given velocity"
+    arg_type = String
+    #required = true
+    default = "fixed"
+    "shortening_ratio"
+    help = "The amount of shortening of the basin. 0.05 will give a 5% shortening by the end of the deformation phase"
+    arg_type = Float64
+    #required = true
+    default = 0.05
+    "boomerang_end_pos"
+    help = "End position of the indenter relative to the height of the basin, 0.2 will make the indenter move up 20% of the height of the basin.Set to 0.0 if you want no inversion."
+    arg_type = Float64
+    #required = true
+    default = 0.20
+    "weak_bot"
+    help = "Bottom decimal position of the weak layer"
+    arg_type = Float64
+    default = 0.4
+    "weak_top"
+    help = "Top decimal position of the weak layer"
+    arg_type = Float64
+    default = 0.6
+    "strong_youngs_modulus"
+    help = "YM of the strong layer"
+    arg_type = Float64
+    default = 2e7
+    "weak_youngs_modulus"
+    help = "YM of the weak layer"
+    arg_type = Float64
+    default = 2e7
+    "strong_poissons_ratio"
+    help = "PR of the strong layer"
+    arg_type = Float64
+    default = 0.185
+    "weak_poissons_ratio"
+    help = "PR of the weak layer"
+    arg_type = Float64
+    default = 0.185
+    "strong_tensile_strength"
+    help = "Tensile strength of the strong layer"
+    arg_type = Float64
+    default = 0.3
+    "weak_tensile_strength"
+    help = "Tensile strength of the weak layer"
+    arg_type = Float64
+    default = 0.01
+    "strong_shear_strength"
+    help = "Shear strength of the strong layer"
+    arg_type = Float64
+    default = 0.3
+    "weak_shear_strength"
+    help = "Tensile strength of the weak layer"
+    arg_type = Float64
+    default = 0.01
+    "strong_contact_dynamic_friction"
+    help = "Friction coefficient of grains in strong layer"
+    arg_type = Float64
+    default = 0.4
+    "weak_contact_dynamic_friction"
+    help = "Friction coefficient of grains in the weak layer"
+    arg_type = Float64
+    default = 0.1
+    "strong_color"
+    help = "Color coding of grains in the strong layer"
+    arg_type = Int
+    default = 1
+    "weak_color"
+    help = "Color coding of grains in the weak layer"
+    arg_type = Int
+    default = 2
+    "t_rest"
+    help = "Time for the basin to rest after layering but before the deformation phase."
+    arg_type = Float64
+    default = 5.0
+    "strong_density"
+    help = "Density of the strong layer"
+    arg_type = Float64
+    default = 934.0
+    "weak_density"
+    help = "Density of the weak layer"
+    arg_type = Float64
+    default = 934.0
+    "layering_type"
+    help = "simple or custom. Simple will use the weak_bot and weak_top values. Custom will use customised boundaries written directly in deform_basin.jl"
+    arg_type = String
+    default = "simple"
+    "skip_layering"
+    help = "true if layering should be skipped, in that case the id of layered sim must be given"
+    arg_type = Bool
+    default = false
+    "layer_id"
+    help = "id of layered sim if layering is skipped"
+    arg_type = Int
+    default = 1
 
-    end
+end
 
-    return parse_args(s)
+return parse_args(s)
 end
 
 function main()
@@ -164,8 +168,22 @@ color = [parsed_args["strong_color"],parsed_args["weak_color"],parsed_args["stro
 t_rest = parsed_args["t_rest"]
 density = [parsed_args["strong_density"],parsed_args["weak_density"],parsed_args["strong_density"]]
 id_number = parsed_args["simulation_id"]
+layering_type = parsed_args["layering_type"]
 skip_layering = parsed_args["skip_layering"]
 layer_id = parsed_args["layer_id"]
+
+weak_youngs_modulus = parsed_args["weak_youngs_modulus"]
+strong_youngs_modulus = parsed_args["strong_youngs_modulus"]
+weak_poissons_ratio = parsed_args["weak_poissons_ratio"]
+strong_poissons_ratio = parsed_args["strong_poissons_ratio"]
+weak_tensile_strength = parsed_args["weak_tensile_strength"]
+strong_tensile_strength = parsed_args["strong_tensile_strength"]
+weak_shear_strength = parsed_args["weak_shear_strength"]
+strong_shear_strength = parsed_args["strong_shear_strength"]
+weak_contact_dynamic_friction = parsed_args["weak_contact_dynamic_friction"]
+strong_contact_dynamic_friction = parsed_args["strong_contact_dynamic_friction"]
+
+
 
 id = "simulation$(sim_nr)"
 
@@ -174,76 +192,163 @@ SimSettings = JLD2.load("$(id)/SimSettings.jld2")
 # ************************ Layering phase ************************
 
 if skip_layering == false
-    sim = Granular.readSimulation("$(id)/comp.jld2")
+
+    if layering_type == "simple"
+        sim = Granular.readSimulation("$(id)/comp.jld2")
 
 
-    # quick fix to color everything except the carpet as color = 1
-    # for some older initiated assemblies, this needs to be done
-    for grain in sim.grains
-        if grain.lin_pos[2] != -0.05
-            grain.color = 1
+        # quick fix to color everything except the carpet as color = 1
+        # for some older initiated assemblies, this needs to be done
+        for grain in sim.grains
+            if grain.lin_pos[2] != -0.05
+                grain.color = 1
+            end
         end
-    end
 
-    y_top = -Inf
-    for grain in sim.grains
-        grain.contact_viscosity_normal = 0
-        if y_top < grain.lin_pos[2] + grain.contact_radius
-            global y_top = grain.lin_pos[2] + grain.contact_radius
+        y_top = -Inf
+        for grain in sim.grains
+            grain.contact_viscosity_normal = 0
+            if y_top < grain.lin_pos[2] + grain.contact_radius
+                global y_top = grain.lin_pos[2] + grain.contact_radius
+            end
         end
-    end
 
-    y_bot = Inf
-    for grain in sim.grains
-        if y_bot > grain.lin_pos[2] - grain.contact_radius
-            global y_bot = grain.lin_pos[2] - grain.contact_radius
+        y_bot = Inf
+        for grain in sim.grains
+            if y_bot > grain.lin_pos[2] - grain.contact_radius
+                global y_bot = grain.lin_pos[2] - grain.contact_radius
+            end
         end
-    end
 
 
-    #Create a color layering scheme that respect the geological layers
+        #Create a color layering scheme that respect the geological layers
 
-    color_interfaces = collect(range(0,1,length=11))
-
-
-    h = y_top-y_bot
-    color_interfaces = collect(range(0,1,length=16))*h
-    colors = [10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20]
-    interfaces *= h
+        h = y_top-y_bot
+        color_interfaces = collect(range(0,1,length=16))*h
+        colors = [10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20]
+        interfaces *= h
 
 
-    for grain in sim.grains
+        for grain in sim.grains
 
-        for i = 2:size(interfaces,1)
+            for i = 2:size(interfaces,1)
 
-            if grain.lin_pos[2] <= interfaces[i] && grain.lin_pos[2] > interfaces[i-1] && grain.color != 0
+                if grain.lin_pos[2] <= interfaces[i] && grain.lin_pos[2] > interfaces[i-1] && grain.color != 0
 
-                grain.youngs_modulus = youngs_modulus[i-1]
-                grain.poissons_ratio = poissons_ratio[i-1]
-                grain.tensile_strength = tensile_strength[i-1]
-                grain.shear_strength = shear_strength[i-1]
-                grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
-                grain.color = color[i-1]
+                    grain.youngs_modulus = youngs_modulus[i-1]
+                    grain.poissons_ratio = poissons_ratio[i-1]
+                    grain.tensile_strength = tensile_strength[i-1]
+                    grain.shear_strength = shear_strength[i-1]
+                    grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
+                    grain.color = color[i-1]
 
+                end
+            end
+        end
+
+        for grain in sim.grains
+
+            for j = 2:size(color_interfaces,1)
+
+                if grain.lin_pos[2] <= color_interfaces[j] && grain.lin_pos[2] > color_interfaces[j-1] && grain.color != 0
+
+                    grain.color += colors[j-1]
+
+                end
             end
         end
     end
 
-    for grain in sim.grains
 
-        for j = 2:size(color_interfaces,1)
+    if layering_type == "custom"
+        sim = Granular.readSimulation("$(id)/comp.jld2")
 
-            if grain.lin_pos[2] <= color_interfaces[j] && grain.lin_pos[2] > color_interfaces[j-1] && grain.color != 0
 
-                grain.color += colors[j-1]
-
+        # quick fix to color everything except the carpet as color = 1
+        # for some older initiated assemblies, this needs to be done
+        for grain in sim.grains
+            if grain.lin_pos[2] != -0.05
+                grain.color = 1
             end
         end
+
+        y_top = -Inf
+        for grain in sim.grains
+            grain.contact_viscosity_normal = 0
+            if y_top < grain.lin_pos[2] + grain.contact_radius
+                global y_top = grain.lin_pos[2] + grain.contact_radius
+            end
+        end
+
+        y_bot = Inf
+        for grain in sim.grains
+            if y_bot > grain.lin_pos[2] - grain.contact_radius
+                global y_bot = grain.lin_pos[2] - grain.contact_radius
+            end
+        end
+
+        #enter custom layer interfaces
+        interfaces = [0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
+        h = y_top-y_bot
+        interfaces *= h
+
+        color_interfaces = collect(range(0,1,length=16))*h
+        colors = [10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20]
+
+        #custom layering values. Here they change between weak and strong in each layer
+
+        youngs_modulus = ones(size(interfaces,1)-1)
+        poissons_ratio = ones(size(interfaces,1)-1)
+        tensile_strength = ones(size(interfaces,1)-1)
+        shear_strength = ones(size(interfaces,1)-1)
+        contact_dynamic_friction = ones(size(interfaces,1)-1)
+
+        youngs_modulus[begin:2:end] .= weak_youngs_modulus
+        youngs_modulus[2:2:end] .= strong_youngs_modulus
+
+        poissons_ratio[begin:2:end] .= weak_poissons_ratio
+        poissons_ratio[2:2:end] .= strong_poissons_ratio
+
+        tensile_strength[begin:2:end] .= weak_tensile_strength
+        tensile_strength[2:2:end] .= strong_tensile_strength
+
+        shear_strength[begin:2:end] .= weak_shear_strength
+        shear_strength[2:2:end] .= strong_shear_strength
+
+        contact_dynamic_friction[begin:2:end] .= weak_contact_dynamic_friction
+        contact_dynamic_friction[2:2:end] .= strong_contact_dynamic_friction
+
+
+        for grain in sim.grains
+
+            for i = 2:size(interfaces,1)
+
+                if grain.lin_pos[2] <= interfaces[i] && grain.lin_pos[2] > interfaces[i-1] && grain.color != 0
+
+                    grain.youngs_modulus = youngs_modulus[i-1]
+                    grain.poissons_ratio = poissons_ratio[i-1]
+                    grain.tensile_strength = tensile_strength[i-1]
+                    grain.shear_strength = shear_strength[i-1]
+                    grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
+                    #grain.color = color[i-1]
+                end
+            end
+        end
+
+
+        for grain in sim.grains
+
+            for j = 2:size(color_interfaces,1)
+
+                if grain.lin_pos[2] <= color_interfaces[j] && grain.lin_pos[2] > color_interfaces[j-1] && grain.color != 0
+
+                    grain.color += colors[j-1]
+                end
+            end
+        end
+
     end
-
-
-
-
+    
 
     # Create the bonds between grains by expanding all grains by a small amount
     # then search and establish contacts and then reduce the size of the grains again
@@ -306,7 +411,13 @@ if skip_layering == false
     Granular.writeSimulation(sim,
     filename = "$(id)/layered$(id_number).jld2")
 
+
+
 end
+
+
+
+
 # ************************ Deformation phase ************************
 
 
@@ -323,6 +434,7 @@ for grain in sim.grains
     grain.enabled = true
     grain.fixed = false
 end
+
 
 
 y_bot_pre = Inf
@@ -367,21 +479,21 @@ for i = 0:grain_radius*2:width
     y_pos = width*hw_ratio*sin(pi/width*x_pos)
 
     Granular.addGrainCylindrical!(temp_indent,
-                                    [x_pos+init_vertex_pos[1]-width/2,y_pos-(width*hw_ratio)+init_vertex_pos[2]],
-                                    grain_radius,
-                                    0.1,
-                                    fixed = true,
-                                    lin_vel = [0.0,boomerang_vel],
-                                    color = -1)
+    [x_pos+init_vertex_pos[1]-width/2,y_pos-(width*hw_ratio)+init_vertex_pos[2]],
+    grain_radius,
+    0.1,
+    fixed = true,
+    lin_vel = [0.0,boomerang_vel],
+    color = -1)
 
 end
 
 append!(sim.grains,temp_indent.grains)
 
 Granular.fitGridToGrains!(sim,
-                            sim.ocean,
-                            north_padding = 5.0,
-                            verbose=false)
+sim.ocean,
+north_padding = 5.0,
+verbose=false)
 
 sim.time_iteration = 0
 sim.time = 0.0
@@ -425,18 +537,18 @@ end
 
 #add walls to the east and west
 Granular.addWallLinearFrictionless!(sim,[1.,0.],
-                                    left_edge,
-                                    bc = "velocity")
+left_edge,
+bc = "velocity")
 
 Granular.addWallLinearFrictionless!(sim,[1.,0.],
-                                    right_edge,
-                                    bc = "velocity")
+right_edge,
+bc = "velocity")
 
 #add wall beneath the carpet
 
 Granular.addWallLinearFrictionless!(sim, [0.,1.],
-                                    y_bot_pre,
-                                    bc = "fixed")
+y_bot_pre,
+bc = "fixed")
 
 
 global checked_done = false
@@ -490,7 +602,7 @@ end
 cd("..")
 
 Granular.writeSimulation(sim,
-                        filename = "$(id)/deformed$(id_number).jld2")
+filename = "$(id)/deformed$(id_number).jld2")
 
 #print time elapsed
 t_now = Dates.now()
