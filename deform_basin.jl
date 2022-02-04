@@ -171,6 +171,8 @@ id_number = parsed_args["simulation_id"]
 layering_type = parsed_args["layering_type"]
 skip_layering = parsed_args["skip_layering"]
 layer_id = parsed_args["layer_id"]
+strong_color = parsed_args["strong_color"]
+weak_color = parsed_args["weak_color"]
 
 weak_youngs_modulus = parsed_args["weak_youngs_modulus"]
 strong_youngs_modulus = parsed_args["strong_youngs_modulus"]
@@ -292,8 +294,12 @@ if skip_layering == false
         h = y_top-y_bot
         interfaces *= h
 
-        color_interfaces = collect(range(0,1,length=16))*h
-        colors = [10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20]
+        #enter custom coloring layer interfaces
+        color_interfaces = collect(range(0,1,length=(size(interfaces,1)-1)*2))*h
+        #colors = [10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20]
+        colors = ones(size(color_interfaces,1))
+        colors[begin:2:end] .= 10
+        colors[2:2:end] .= 20
 
         #custom layering values. Here they change between weak and strong in each layer
 
@@ -302,6 +308,7 @@ if skip_layering == false
         tensile_strength = ones(size(interfaces,1)-1)
         shear_strength = ones(size(interfaces,1)-1)
         contact_dynamic_friction = ones(size(interfaces,1)-1)
+        color = ones(size(interfaces,1)-1)
 
         youngs_modulus[begin:2:end] .= weak_youngs_modulus
         youngs_modulus[2:2:end] .= strong_youngs_modulus
@@ -318,6 +325,9 @@ if skip_layering == false
         contact_dynamic_friction[begin:2:end] .= weak_contact_dynamic_friction
         contact_dynamic_friction[2:2:end] .= strong_contact_dynamic_friction
 
+        color[begin:2:end] .= weak_color
+        color[2:2:end] .= strong_color
+
 
         for grain in sim.grains
 
@@ -330,7 +340,7 @@ if skip_layering == false
                     grain.tensile_strength = tensile_strength[i-1]
                     grain.shear_strength = shear_strength[i-1]
                     grain.contact_dynamic_friction = contact_dynamic_friction[i-1]
-                    #grain.color = color[i-1]
+                    grain.color = color[i-1]
                 end
             end
         end
@@ -348,7 +358,7 @@ if skip_layering == false
         end
 
     end
-    
+
 
     # Create the bonds between grains by expanding all grains by a small amount
     # then search and establish contacts and then reduce the size of the grains again
