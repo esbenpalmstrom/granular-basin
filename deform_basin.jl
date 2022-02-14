@@ -197,6 +197,7 @@ if skip_layering == false
 
     if layering_type == "simple"
         sim = Granular.readSimulation("$(id)/comp.jld2")
+        Granular.zeroKinematics!(sim)
 
 
         # quick fix to color everything except the carpet as color = 1
@@ -264,6 +265,7 @@ if skip_layering == false
 
     if layering_type == "custom"
         sim = Granular.readSimulation("$(id)/comp.jld2")
+        Granular.zeroKinematics!(sim)
 
 
         # quick fix to color everything except the carpet as color = 1
@@ -440,9 +442,13 @@ elseif skip_layering == false
     sim = Granular.readSimulation("$(id)/layered$(id_number).jld2")
 end
 
+Granular.zeroKinematics!(sim)
+
+
 for grain in sim.grains
     grain.enabled = true
     grain.fixed = false
+    grain.thermal_energy = 0.0 # reset also the thermal energy stored in each grain
 end
 
 

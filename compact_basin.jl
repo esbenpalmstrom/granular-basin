@@ -6,10 +6,10 @@ import Dates
 t_start = Dates.now() # Save the start time, print the end time later.
 
 
-id = "simulation600"  # id of simulation to load
+id = "simulation1000"  # id of simulation to load
 N = 20e3                # amount of stress to be applied
-t_comp = 1.0            # compaction max duration [s]
-t_rest = 0.5
+t_comp = 5.0            # compaction max duration [s]
+t_rest = 2.0
 
 sim = Granular.readSimulation("$(id)/init.jld2")
 SimSettings = JLD2.load("$(id)/SimSettings.jld2")
