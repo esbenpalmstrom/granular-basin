@@ -13,8 +13,8 @@ export writeSimulation
                          folder::String=".",
                          verbose::Bool=true)
 
-Write all content from `Simulation` to disk in JLD2 format.  If the `filename` 
-parameter is not specified, it will be saved to a subdirectory under the current 
+Write all content from `Simulation` to disk in JLD2 format.  If the `filename`
+parameter is not specified, it will be saved to a subdirectory under the current
 directory named after the simulation identifier `simulation.id`.
 """
 function writeSimulation(simulation::Simulation;
@@ -157,7 +157,7 @@ export status
 """
     status(folder[, loop, t_int, colored_output, write_header, render)
 
-Shows the status of all simulations with output files written under the 
+Shows the status of all simulations with output files written under the
 specified `folder`, which is the current working directory by default.
 
 # Arguments
@@ -288,12 +288,12 @@ end
 
 export writeVTK
 """
-Write a VTK file to disk containing all grains in the `simulation` in an 
-unstructured mesh (file type `.vtu`).  These files can be read by ParaView and 
+Write a VTK file to disk containing all grains in the `simulation` in an
+unstructured mesh (file type `.vtu`).  These files can be read by ParaView and
 can be visualized by applying a *Glyph* filter.
 
-If the simulation contains an `Ocean` data structure, it's contents will be 
-written to separate `.vtu` files.  This can be disabled by setting the argument 
+If the simulation contains an `Ocean` data structure, it's contents will be
+written to separate `.vtu` files.  This can be disabled by setting the argument
 `ocean=false`.  The same is true for the atmosphere.
 
 The VTK files will be saved in a subfolder named after the simulation.
@@ -302,28 +302,29 @@ function writeVTK(simulation::Simulation;
                   folder::String=".",
                   verbose::Bool=true,
                   ocean::Bool=true,
-                  atmosphere::Bool=true)
+                  atmosphere::Bool=true,
+                  shear_strain_matrix::Matrix{Float64}=zeros(size(simulation.grains,1)))
 
     simulation.file_number += 1
     folder = folder * "/" * simulation.id
     mkpath(folder)
 
-    filename = string(folder, "/", simulation.id, ".grains.", 
+    filename = string(folder, "/", simulation.id, ".grains.",
                       simulation.file_number)
-    writeGrainVTK(simulation, filename, verbose=verbose)
+    writeGrainVTK(simulation, filename, verbose=verbose, shear_strain_matrix=shear_strain_matrix)
 
-    filename = string(folder, "/", simulation.id, ".grain-interaction.", 
+    filename = string(folder, "/", simulation.id, ".grain-interaction.",
                       simulation.file_number)
     writeGrainInteractionVTK(simulation, filename, verbose=verbose)
 
     if typeof(simulation.ocean.input_file) != Bool && ocean
-        filename = string(folder, "/", simulation.id, ".ocean.", 
+        filename = string(folder, "/", simulation.id, ".ocean.",
                         simulation.file_number)
         writeGridVTK(simulation.ocean, filename, verbose=verbose)
     end
 
     if typeof(simulation.atmosphere.input_file) != Bool && atmosphere
-        filename = string(folder, "/", simulation.id, ".atmosphere.", 
+        filename = string(folder, "/", simulation.id, ".atmosphere.",
                         simulation.file_number)
         writeGridVTK(simulation.atmosphere, filename, verbose=verbose)
     end
@@ -332,17 +333,18 @@ end
 
 export writeGrainVTK
 """
-Write a VTK file to disk containing all grains in the `simulation` in an 
-unstructured mesh (file type `.vtu`).  These files can be read by ParaView and 
-can be visualized by applying a *Glyph* filter.  This function is called by 
+Write a VTK file to disk containing all grains in the `simulation` in an
+unstructured mesh (file type `.vtu`).  These files can be read by ParaView and
+can be visualized by applying a *Glyph* filter.  This function is called by
 `writeVTK()`.
 """
 function writeGrainVTK(simulation::Simulation,
                          filename::String;
-                         verbose::Bool=false)
+                         verbose::Bool=false,
+                         shear_strain_matrix::Matrix{Float64}=zeros(size(simulation.grains,1)))
 
     ifarr = convertGrainDataToArrays(simulation)
-    
+
     # add arrays to VTK file
     vtkfile = WriteVTK.vtk_grid("$filename.vtu", ifarr.lin_pos,
                                 WriteVTK.MeshCell[])
@@ -441,6 +443,9 @@ function writeGrainVTK(simulation::Simulation,
     WriteVTK.vtk_point_data(vtkfile, ifarr.color,
                             "Color [-]")
 
+    WriteVTK.vtk_point_data(vtkfile, shear_strain_matrix,
+                            "Shear strain [-]")
+
     deleteGrainArrays!(ifarr)
     ifarr = 0
 
@@ -457,7 +462,7 @@ export writeGrainInteractionVTK
                                filename::String;
                                verbose::Bool=false)
 
-Saves grain interactions to `.vtp` files for visualization with VTK, for 
+Saves grain interactions to `.vtp` files for visualization with VTK, for
 example in Paraview.  Convert Cell Data to Point Data and use with Tube filter.
 """
 function writeGrainInteractionVTK(simulation::Simulation,
@@ -509,7 +514,7 @@ function writeGrainInteractionVTK(simulation::Simulation,
                 end
                 δ_n = dist - (r_i + r_j)
                 R_ij = harmonicMean(r_i, r_j)
-                A_ij = R_ij*min(simulation.grains[i].thickness, 
+                A_ij = R_ij*min(simulation.grains[i].thickness,
                                 simulation.grains[j].thickness)
 
                 if simulation.grains[i].youngs_modulus > 0. &&
@@ -526,7 +531,7 @@ function writeGrainInteractionVTK(simulation::Simulation,
                                        contact_stiffness_normal)
                 end
 
-                
+
                 push!(i1, i)
                 push!(i2, j)
                 push!(inter_particle_vector, p)
@@ -550,7 +555,7 @@ function writeGrainInteractionVTK(simulation::Simulation,
         end
     end
 
-    # Insert a piece for each grain interaction using grain positions as 
+    # Insert a piece for each grain interaction using grain positions as
     # coordinates and connect them with lines by referencing their indexes.
     open(filename * ".vtp", "w") do f
         write(f, "<?xml version=\"1.0\"?>\n")
@@ -634,7 +639,7 @@ function writeGrainInteractionVTK(simulation::Simulation,
         write(f, "        </DataArray>\n")
 
         write(f, "        <DataArray type=\"Float32\" " *
-              "Name=\"Contact rotation [rad]\" NumberOfComponents=\"3\" 
+              "Name=\"Contact rotation [rad]\" NumberOfComponents=\"3\"
         format=\"ascii\">\n")
         for i=1:length(i1)
             @inbounds write(f, "$(contact_rotation[i][1]) ")
@@ -645,7 +650,7 @@ function writeGrainInteractionVTK(simulation::Simulation,
         write(f, "        </DataArray>\n")
 
         write(f, "        <DataArray type=\"Float32\" " *
-              "Name=\"Contact age [s]\" NumberOfComponents=\"1\" 
+              "Name=\"Contact age [s]\" NumberOfComponents=\"1\"
         format=\"ascii\">\n")
         for i=1:length(i1)
             @inbounds write(f, "$(contact_age[i]) ")
@@ -654,7 +659,7 @@ function writeGrainInteractionVTK(simulation::Simulation,
         write(f, "        </DataArray>\n")
 
         write(f, "        <DataArray type=\"Float32\" " *
-              "Name=\"Contact area [m*m]\" NumberOfComponents=\"1\" 
+              "Name=\"Contact area [m*m]\" NumberOfComponents=\"1\"
         format=\"ascii\">\n")
         for i=1:length(i1)
             @inbounds write(f, "$(contact_area[i]) ")
@@ -663,7 +668,7 @@ function writeGrainInteractionVTK(simulation::Simulation,
         write(f, "        </DataArray>\n")
 
         write(f, "        <DataArray type=\"Float32\" " *
-              "Name=\"Compressive failure [-]\" NumberOfComponents=\"1\" 
+              "Name=\"Compressive failure [-]\" NumberOfComponents=\"1\"
         format=\"ascii\">\n")
         for i=1:length(i1)
             @inbounds write(f, "$(Int(compressive_failure[i])) ")
@@ -702,8 +707,8 @@ function writeGrainInteractionVTK(simulation::Simulation,
         end
         write(f, "\n")
         write(f, "        </DataArray>\n")
-        
-        # Write 0-indexed offset for the connectivity array for the end of each 
+
+        # Write 0-indexed offset for the connectivity array for the end of each
         # cell
         write(f, "        <DataArray type=\"Int64\" Name=\"offsets\" " *
               "format=\"ascii\">\n")
@@ -739,15 +744,15 @@ end
 
 export writeOceanVTK
 """
-Write a VTK file to disk containing all ocean data in the `simulation` in a 
-structured grid (file type `.vts`).  These files can be read by ParaView and can 
-be visualized by applying a *Glyph* filter.  This function is called by 
+Write a VTK file to disk containing all ocean data in the `simulation` in a
+structured grid (file type `.vts`).  These files can be read by ParaView and can
+be visualized by applying a *Glyph* filter.  This function is called by
 `writeVTK()`.
 """
 function writeGridVTK(grid::Any,
                       filename::String;
                       verbose::Bool=false)
-    
+
     # make each coordinate array three-dimensional
     xq = similar(grid.u[:,:,:,1])
     yq = similar(grid.u[:,:,:,1])
@@ -1121,10 +1126,10 @@ function render(simulation::Simulation; pvpython::String="pvpython",
 
         if animation
             try
-                run(`ffmpeg -i $(simulation.id)/$(simulation.id).avi 
-                    -vf scale='trunc\(iw/2\)\*2:trunc\(ih/2\)\*2' 
-                    -c:v libx264 -profile:v high -pix_fmt yuv420p 
-                    -g 30 -r 30 -y 
+                run(`ffmpeg -i $(simulation.id)/$(simulation.id).avi
+                    -vf scale='trunc\(iw/2\)\*2:trunc\(ih/2\)\*2'
+                    -c:v libx264 -profile:v high -pix_fmt yuv420p
+                    -g 30 -r 30 -y
                     $(simulation.id)/$(simulation.id).mp4`)
                 if isfile("$(simulation.id)/$(simulation.id).mp4")
                     rm("$(simulation.id)/$(simulation.id).avi")
@@ -1150,15 +1155,15 @@ function render(simulation::Simulation; pvpython::String="pvpython",
                 # otherwise search for convert in $PATH
                 convert = "convert"
 
-                run(`$convert $trim_string +repage -delay 10 
-                    -transparent-color white 
-                    -loop 0 $(simulation.id)/$(simulation.id).'*'.png 
+                run(`$convert $trim_string +repage -delay 10
+                    -transparent-color white
+                    -loop 0 $(simulation.id)/$(simulation.id).'*'.png
                     $(simulation.id)/$(simulation.id).gif`)
                 if reverse
-                    run(`$convert -trim +repage -delay 10 
-                        -transparent-color white 
+                    run(`$convert -trim +repage -delay 10
+                        -transparent-color white
                         -loop 0 -reverse
-                        $(simulation.id)/$(simulation.id).'*'.png 
+                        $(simulation.id)/$(simulation.id).'*'.png
                         $(simulation.id)/$(simulation.id)-reverse.gif`)
                 end
             catch return_signal
@@ -1201,23 +1206,23 @@ export plotGrainSizeDistribution
                                 size_type, filetype, gnuplot_terminal,
                                 skip_fixed, log_y, verbose)
 
-Plot the grain size distribution as a histogram and save it to the disk.  The 
-plot is saved accoring to the simulation id, the optional `filename_postfix` 
+Plot the grain size distribution as a histogram and save it to the disk.  The
+plot is saved accoring to the simulation id, the optional `filename_postfix`
 string, and the `filetype`, and is written to the current folder.
 
 # Arguments
 * `simulation::Simulation`: the simulation object containing the grains.
 * `filename_postfix::String`: optional string for the output filename.
 * `nbins::Int`: number of bins in the histogram (default = 12).
-* `size_type::String`: specify whether to use the `contact` or `areal` radius 
+* `size_type::String`: specify whether to use the `contact` or `areal` radius
     for the grain size.  The default is `contact`.
 * `filetype::String`: the output file type (default = "png").
 * `gnuplot_terminal::String`: the gnuplot output terminal to use (default =
     "png").
-* `skip_fixed::Bool`: ommit grains that are fixed in space from the size 
+* `skip_fixed::Bool`: ommit grains that are fixed in space from the size
     distribution (default = true).
 * `log_y::Bool`: plot y-axis in log scale.
-* `verbose::String`: show output file as info message in stdout (default = 
+* `verbose::String`: show output file as info message in stdout (default =
     true).
 """
 function plotGrainSizeDistribution(simulation::Simulation;
@@ -1244,7 +1249,7 @@ function plotGrainSizeDistribution(simulation::Simulation;
         end
     end
 
-    filename = string(simulation.id * filename_postfix * 
+    filename = string(simulation.id * filename_postfix *
                       "-grain-size-distribution." * filetype)
 
     # write data to temporary file on disk
@@ -1302,7 +1307,7 @@ Plot the grains using Gnuplot and save the figure to disk.
 * `gnuplot_terminal::String`: the gnuplot output terminal to use (default =
     "png crop size 1200,1200").
 * `plot_interactions::Bool`: show grain-grain interactions in the plot.
-* `verbose::String`: show output file as info message in stdout (default = 
+* `verbose::String`: show output file as info message in stdout (default =
     true).
 """
 function plotGrains(sim::Simulation;
@@ -1381,7 +1386,7 @@ function plotGrains(sim::Simulation;
                                             youngs_modulus,
                                             sim.grains[j].
                                             youngs_modulus)
-                        A_ij = R_ij*min(sim.grains[i].thickness, 
+                        A_ij = R_ij*min(sim.grains[i].thickness,
                                         sim.grains[j].thickness)
                         k_n = E_ij*A_ij/R_ij
                     else
@@ -1464,7 +1469,7 @@ function plotGrains(sim::Simulation;
 
         # light gray to black to red
         write(f, "set palette defined ( 1 '#d3d3d3', 2 '#000000', 3 '#993333')\n")
-        
+
         if !isnan(cbrange[1])
             write(f, "set cbrange [$(cbrange[1]):$(cbrange[2])]\n")
         end
