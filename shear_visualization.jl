@@ -2,8 +2,8 @@ include("Granular/src/Granular.jl")
 import JLD2
 import Statistics
 
-id_nr = 2 # id number of simulation
-grain_nr = 500 # number of grains in simulation
+id_nr = 1 # id number of simulation
+grain_nr = 1000 # number of grains in simulation
 
 sim = Granular.readSimulation("simulation$(grain_nr)/deformed$(id_nr).jld2")
 
@@ -34,7 +34,8 @@ for grain_i in sim.grains
         dist = sqrt((dx^2)+(dy^2))
 
         #if (dx > (r_av*2) || dy > (r_av*2) || grain_i==grain_j)
-        if (dist > r_av*3 || grain_i == grain_j || grain_j.color == -1 || grain_j.color == 0 || dist < (r_av/2))
+        if (dist > r_av*3 || grain_i == grain_j || grain_j.color == -1 || grain_j.color == 0
+             || dist < (r_av/2) || dx < grain_i.areal_radius*0.1  || dy < grain_i.areal_radius*0.1)
             continue
         end
 
