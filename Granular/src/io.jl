@@ -303,7 +303,7 @@ function writeVTK(simulation::Simulation;
                   verbose::Bool=true,
                   ocean::Bool=true,
                   atmosphere::Bool=true,
-                  shear_strain_matrix::Matrix{Float64}=zeros(size(simulation.grains,1)))
+                  shear_strain_matrix::Matrix{Float64}=zeros(2,size(simulation.grains,1)))
 
     simulation.file_number += 1
     folder = folder * "/" * simulation.id
@@ -341,7 +341,7 @@ can be visualized by applying a *Glyph* filter.  This function is called by
 function writeGrainVTK(simulation::Simulation,
                          filename::String;
                          verbose::Bool=false,
-                         shear_strain_matrix::Matrix{Float64}=zeros(size(simulation.grains,1)))
+                         shear_strain_matrix::Matrix{Float64}=zeros(2,size(simulation.grains,1)))
 
     ifarr = convertGrainDataToArrays(simulation)
 
