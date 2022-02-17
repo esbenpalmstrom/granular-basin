@@ -2,8 +2,8 @@ include("Granular/src/Granular.jl")
 import JLD2
 import Statistics
 
-id_nr = 1 # id number of simulation
-grain_nr = 1000 # number of grains in simulation
+id_nr = 14 # id number of simulation
+grain_nr = 40000 # number of grains in simulation
 
 sim = Granular.readSimulation("simulation$(grain_nr)/deformed$(id_nr).jld2")
 
@@ -26,7 +26,7 @@ global k = 1
 for grain_i in sim.grains
     shear_strain = zeros(2)
 
-    global k = 1
+    #global k = 1
 
     for grain_j in sim.grains
         dx = grain_j.lin_pos[1] - grain_i.lin_pos[1]
@@ -34,14 +34,14 @@ for grain_i in sim.grains
         dist = sqrt((dx^2)+(dy^2))
 
         #if (dx > (r_av*2) || dy > (r_av*2) || grain_i==grain_j)
-        if (dist > r_av*3 || grain_i == grain_j || grain_j.color == -1 || grain_j.color == 0
-             || dist < (r_av/2) || dx < grain_i.areal_radius*0.1  || dy < grain_i.areal_radius*0.1)
+        if (dist > r_av*5 || grain_i == grain_j || grain_j.color == -1 || grain_j.color == 0
+             || dx < grain_i.areal_radius*0.1  || dy < grain_i.areal_radius*0.1)
             continue
         end
 
-        @info "accepted dist: $(dist), this is number $(j), and it is number $(k) contact for this grain"
-        global j += 1
-        global k += 1
+        #@info "accepted dist: $(dist), this is number $(j), and it is number $(k) contact for this grain"
+        #global j += 1
+        #global k += 1
 
         disp_x = grain_j.lin_disp[1] - grain_i.lin_disp[1]
         disp_y = grain_j.lin_disp[2] - grain_i.lin_disp[2]
@@ -49,10 +49,10 @@ for grain_i in sim.grains
         shear_strain[1] += disp_y/dx
         shear_strain[2] += disp_x/dy
 
-        if (shear_strain[1] > 100 || shear_strain[2] > 100)
-            @warn "shear strain of over 100 was detected for grain $(i), with disp_x of $(disp_x) and disp_y of $(disp_y)
-            and dx of $(dx) and dy of $(dy)"
-        end
+        #if (shear_strain[1] > 100 || shear_strain[2] > 100)
+        #    @warn "shear strain of over 100 was detected for grain $(i), with disp_x of $(disp_x) and disp_y of $(disp_y)
+        #    and dx of $(dx) and dy of $(dy)"
+        #end
 
     end
 
@@ -66,6 +66,10 @@ for grain_i in sim.grains
 
 
     global i+=1
+
+    if (i%1000 == 0)
+        @info "Progress: $(i)/$(size(sim.grains,1))"
+    end
 
 end
 

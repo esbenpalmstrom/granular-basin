@@ -8,13 +8,13 @@ t_start = Dates.now()           # Save the start time, print the end time later.
 
 ############# Initialization Settings #############
 
-t_init = 1.5                    # duration of initialization [s]
-t_stack = 1.0                   # duration for each stack to settle [s]
+t_init = 5.0                    # duration of initialization [s]
+t_stack = 2.0                   # duration for each stack to settle [s]
 
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
-ngrains = 600                   # total number of grains
-aspect_ratio = 6                # should be x times as wide as it is tall
+ngrains = 3000                   # total number of grains
+aspect_ratio = 4                # should be x times as wide as it is tall, 6 is used for the 40k experiment
 
 mkpath("simulation$(ngrains)")
 
@@ -217,9 +217,10 @@ append!(sim.grains,carpet.grains) # add the carpet grains to the main simulation
 # object will appear in the main simulation object
 
 
-"""
+
 #reset the grain contacts and make them very old
 
+"""
 for grain in sim.grains
     grain.contacts[:] .= 0
     grain.n_contacts = 0

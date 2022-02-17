@@ -6,10 +6,10 @@ import Dates
 t_start = Dates.now() # Save the start time, print the end time later.
 
 
-id = "simulation1000"  # id of simulation to load
+id = "simulation3000"   # id of simulation to load
 N = 20e3                # amount of stress to be applied
-t_comp = 5.0            # compaction max duration [s]
-t_rest = 2.0
+t_comp = 3.0            # compaction max duration [s]
+t_rest = 1.0
 
 sim = Granular.readSimulation("$(id)/init.jld2")
 SimSettings = JLD2.load("$(id)/SimSettings.jld2")
@@ -46,6 +46,11 @@ for grain in sim.grains
     if y_bot > grain.lin_pos[2] - grain.contact_radius
         global y_bot = grain.lin_pos[2] - grain.contact_radius
     end
+end
+
+#try settings the friction to 0 and see what happens?
+for grain in sim.grains
+    grain.contact_dynamic_friction = 0.0
 end
 
 #fixed_thickness = 2. * SimSettings["r_max"]
