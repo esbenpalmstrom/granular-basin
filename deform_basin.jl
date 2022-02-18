@@ -365,7 +365,7 @@ if skip_layering == false
     # Create the bonds between grains by expanding all grains by a small amount
     # then search and establish contacts and then reduce the size of the grains again
 
-    size_increasing_factor = 1.10   # factor by which contact radius should be increased
+    size_increasing_factor = 1.50   # factor by which contact radius should be increased
     # to search for contacts
     size_reduction_factor = -((size_increasing_factor-1)/(1+(size_increasing_factor-1)))
     increase_array = []
@@ -510,7 +510,7 @@ Granular.fitGridToGrains!(sim,
 sim.ocean,
 north_padding = 5.0,
 verbose=false)
-
+Friction
 sim.time_iteration = 0
 sim.time = 0.0
 sim.file_time_since_output_file = 0.
@@ -533,7 +533,7 @@ cd("$id")
 
 sim.id = "deformed$(id_number)"
 
-
+Friction
 #sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
 
 #find the edge grains of the carpet
