@@ -507,10 +507,10 @@ end
 append!(sim.grains,temp_indent.grains)
 
 Granular.fitGridToGrains!(sim,
-sim.ocean,
-north_padding = 5.0,
-verbose=false)
-Friction
+                        sim.ocean,
+                        north_padding = 5.0,
+                        verbose=false)
+
 sim.time_iteration = 0
 sim.time = 0.0
 sim.file_time_since_output_file = 0.
@@ -533,7 +533,6 @@ cd("$id")
 
 sim.id = "deformed$(id_number)"
 
-Friction
 #sim.walls = Granular.WallLinearFrictionless[] # remove existing walls
 
 #find the edge grains of the carpet
