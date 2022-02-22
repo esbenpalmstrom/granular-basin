@@ -2,8 +2,10 @@ include("Granular/src/Granular.jl")
 import JLD2
 import Statistics
 
-id_nr = 14 # id number of simulation
+id_nr = 10 # id number of simulation
 grain_nr = 40000 # number of grains in simulation
+
+@info "Started shear calculations for simulation $(id_nr) containing $(grain_nr) grains"
 
 sim = Granular.readSimulation("simulation$(grain_nr)/deformed$(id_nr).jld2")
 
@@ -39,9 +41,6 @@ for grain_i in sim.grains
             continue
         end
 
-        #@info "accepted dist: $(dist), this is number $(j), and it is number $(k) contact for this grain"
-        #global j += 1
-        #global k += 1
 
         disp_x = grain_j.lin_disp[1] - grain_i.lin_disp[1]
         disp_y = grain_j.lin_disp[2] - grain_i.lin_disp[2]
@@ -49,10 +48,6 @@ for grain_i in sim.grains
         shear_strain[1] += disp_y/dx
         shear_strain[2] += disp_x/dy
 
-        #if (shear_strain[1] > 100 || shear_strain[2] > 100)
-        #    @warn "shear strain of over 100 was detected for grain $(i), with disp_x of $(disp_x) and disp_y of $(disp_y)
-        #    and dx of $(dx) and dy of $(dy)"
-        #end
 
     end
 
@@ -61,9 +56,6 @@ for grain_i in sim.grains
     if (grain_i.color == 0 || grain_i.color == -1)
         shear_strain_array[:,i] = [0.0,0.0]
     end
-
-
-
 
     global i+=1
 
