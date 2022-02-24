@@ -2,7 +2,7 @@ include("Granular/src/Granular.jl")
 import JLD2
 import Statistics
 
-id_nr = 10 # id number of simulation
+id_nr = 28 # id number of simulation
 grain_nr = 40000 # number of grains in simulation
 
 @info "Started shear calculations for simulation $(id_nr) containing $(grain_nr) grains"
