@@ -1,3 +1,16 @@
+"""
+This script will consolidate an initialized granular basin in order to make it
+ready for layering and deformation
+
+Relevant arguments:
+
+* `id::String`: id of the simulation to load. This will be "simulationX" where X
+    is the ngrains in the original simulation. For example "simulation40000", if
+    ngrains=40000 were used in the initialization.
+* `N::Float64=20e3`: Amount of stress to be applied during the compaction [Pa]
+* `t_comp::Float64`: Time to spend compacting the basin [s].
+* `t_rest::Float64`: Time to spend letting the basin rest after compaction [s].
+"""
 include("Granular/src/Granular.jl")
 import JLD2
 import PyPlot
