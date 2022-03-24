@@ -1,7 +1,47 @@
+"""
+This script will initialize a granular basin.
+
+Settings for this script should be adjusted in the top of the script before running
+Feel free to implement commandline argument parsing or whatever else.
+
+A local copy of the Granular package is included, since changes were made to the
+source code to accomodate certain functionalities.
+
+The files init_basin.jl, compact_basin.jl and deform_basin.jl should all be run
+from the same directory.
+
+Relevant arguments:
+* `t_init::Float64=5.0`: Time to spend initializing the first stack of the basin [s].
+* `t_stack::Float64=2.0`: Time to let each subsequent stack settle [s].
+* `g::Vector{Float64}=[0.,-9.8]`: gravitational acceleration vector [m/s^2].
+* `ngrains::Int`: Approximate number of grains to include in the simulation.
+* `aspect_ratio::Int=6`: Approximate final width to height ratio of the basin.
+    A ratio of 6 will give a basin which is approximately 6 times as wide as it is deep.
+* `stacks::Int=2`: Number of times that the grains should be stacked on top of
+    themselves during the initialization. Has no influence on final number of
+    grains. This is done only for computation time purposes.
+* `r_min::Float64=0.05`: Minimum radius of grains [m]. The maximum radius of
+    grains will be calculated to make the largest grains have twice the area
+    of the smallest. This can be changed in the script.
+* `gsd_type::String="powerlaw"`: Type of grain size distribution. Can be
+    "powerlaw" or "uniform".
+* `gsd_power_exponent::Float64=-1.8`: Exponent if powerlaw is used for grain
+    size distribution
+* `gsd_seed::Int`: Seed for random distribution of grain sizes.
+* `youngs_modulus::Float64=2e7`: Youngs modulus for initial grains [Pa].
+    Will be changed later.
+* `poissons_ratio::Float64=0.185`: Poissons ratio for the initial grains.
+    Will be changed later.
+* `tensile:strength::Float64=0.0`: Tensile bond strength for inital grains [Pa].
+    Will be changed later.
+* `contact_dynamic_friction::Float64=0.4`: Coulomb frictional coefficient.
+    Will be changed later
+* `rotating::Bool=true`: Whether grains should be allowed to rotate or not.
+
+"""
+
 include("Granular/src/Granular.jl")
-#import Granular
 import JLD2
-import PyPlot
 import Dates
 
 t_start = Dates.now()           # Save the start time, print the end time later.
@@ -13,20 +53,18 @@ t_stack = 2.0                   # duration for each stack to settle [s]
 
 g = [0.,-9.8]                   # vector for direction and magnitude of gravitational acceleration of grains
 
-ngrains = 3000                   # total number of grains
+ngrains = 3000                  # total number of grains
 aspect_ratio = 4                # should be x times as wide as it is tall, 6 is used for the 40k experiment
 
 mkpath("simulation$(ngrains)")
 
-
-stacks = 2                      # number of duplicate stacks on top of the initial grains
+stacks = 2                           # number of duplicate stacks on top of the initial grains
 
 ny = sqrt((ngrains)/aspect_ratio)    # number of grain rows
 nx = aspect_ratio*ny*(stacks+1)      # number of grain columns
 
 ny = Int(round(ny/(stacks+1)))
 nx = Int(round(nx/(stacks+1)))
-
 
 r_min = 0.05                    # minimum radius of grains
 r_max = r_min*sqrt(2)           # max radius of grains, double the area of minimum
@@ -43,7 +81,7 @@ tensile_strength = 0.0          # strength of bonds between grains
 contact_dynamic_friction = 0.4  # friction between grains
 rotating = true                 # can grains rotate or not
 
-# Save some settings in a dictionary
+# Save some settings in a dictionary for use in other scripts.
 SimSettings = Dict()
 SimSettings["nx"] = nx
 SimSettings["ny"] = ny
@@ -51,8 +89,6 @@ SimSettings["stacks"] = stacks
 SimSettings["ngrains"] = ngrains
 SimSettings["r_min"] = r_min
 SimSettings["r_max"] = r_max
-
-# this section has been moved further up
 
 ############# Initialize simulation and grains #############
 
@@ -105,7 +141,6 @@ cd("simulation$(ngrains)")
 sim.id = "init"
 
 Granular.run!(sim)
-
 
 
 ############# Stack the initialized grains #############
@@ -173,8 +208,6 @@ for i = 1:stacks
 end
 
 
-
-
 ############# Lay a carpet #############
 
 carpet = Granular.createSimulation(id="init_carpet") # new simulation object for the carpet
@@ -200,21 +233,16 @@ for i = left_edge+(bot_r/2):bot_r*1.999:left_edge+length
                                 verbose = false,
                                 tensile_strength = Inf,
                                 shear_strength = Inf,
-                                #contact_stiffness_normal = Inf,
-                                #contact_stiffness_tangential = Inf,
                                 fixed = false,
                                 color = 0)
 end
 
-#Granular.fitGridToGrains!(carpet,carpet.ocean,verbose=false)
 
 
 Granular.findContactsAllToAll!(carpet) # find the grain contacts
 
 
 append!(sim.grains,carpet.grains) # add the carpet grains to the main simulation object
-# since the assignment will point to the carpet object, changes made to the carpet
-# object will appear in the main simulation object
 
 
 
@@ -242,8 +270,6 @@ Granular.setGridBoundaryConditions!(sim.ocean, "impermeable", "north south",
 Granular.setGridBoundaryConditions!(sim.ocean, "impermeable", "east west",
 																verbose=false)
 
-#Granular.findContacts!(sim,method="ocean grid")
-
 # run the simulation shortly, to let the stacked grains settle on the carpet
 sim.time_iteration = 0
 sim.time = 0.0
@@ -252,12 +278,10 @@ Granular.setTotalTime!(sim, 0.5)
 Granular.setTimeStep!(sim)
 Granular.setOutputFileInterval!(sim, .01)
 
-
 Granular.run!(sim)
 
 
 # save the simulation and the carpet objects
-
 cd("..")
 
 Granular.writeSimulation(sim,

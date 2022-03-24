@@ -1,7 +1,25 @@
+"""
+This script is called in the command line with inputs in correct order:
+Example:
+
+julia deform_basin.jl 1 40000 0.12 10.0 false "fixed" 0.0 0.5 0.0 0.5 3.5e7 0.5e7 0.185 0.300 0.7 0.01 0.7 0.01 0.25 0.05 1 2 5.0 934.0 934.0 "simple" false
+
+Take care not to overwrite previous files if the same id are used multiple times.
+
+Since seperate instances of julia can run on separate threads, it is possible
+to run multiple deformation processes without losing performance.
+
+
+With a bit of shell scripting, it is possible to initiate multiple runs from the
+same shell script with log files being produced. ex:
+julia deform_basin.jl 1 40000 0.12 10.0 false "fixed" 0.0 0.5 0.0 0.5 3.5e7 0.5e7 0.185 0.300 0.7 0.01 0.7 0.01 0.25 0.05 1 2 5.0 934.0 934.0 "simple" false >1.log 2>&1 &
+julia deform_basin.jl 2 40000 0.12 10.0 false "fixed" 0.0 0.5 0.0 0.5 3.5e7 0.5e7 0.185 0.300 0.7 0.01 0.7 0.01 0.25 0.05 1 2 5.0 934.0 934.0 "simple" false >2.log 2>&1 &
+"""
+
+
 include("Granular/src/Granular.jl")
 import JLD2
 import Dates
-import PyPlot
 using ArgParse
 
 t_start = Dates.now()
