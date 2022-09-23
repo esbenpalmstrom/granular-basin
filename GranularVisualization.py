@@ -7,6 +7,11 @@
 
 from paraview.simple import *
 import glob
+import os
+
+# make a key for natural sorting the list of vtu files
+import re
+natsort = lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split('(\d+)', s)]
 
 
 #inputs:
@@ -21,10 +26,12 @@ def importSimulation(simnr,simid,shearstrain):
     if shearstrain == False:
         pathvtu = simnr+'/deformed'+str(simid)+'/*.vtu'
         listvtu = glob.glob(pathvtu)
+        # e.g. pathvtu = 'simulation40000/deformed20/*.vtu'
     elif shearstrain == True:
         pathvtu = simnr+'deformed'+str(simid)+'_shear_strain/*.vtu'
         listvtu = glob.glob(pathvtu)
 
+    listvtu.sort(key=natsort)
 
     imagegrains = XMLUnstructuredGridReader(FileName=listvtu) #pass .vtu file list here
 
@@ -131,7 +138,7 @@ def importSimulation(simnr,simid,shearstrain):
     return imagegrains
 
 
-def writePVFigure(imagegrains,ColoringArray):
+def writePVFigure(imagegrains,ColoringArray='Color [-]',timestep=0.0):
 
     #inputs: imagegrains, timeslice, color1, color2
 
@@ -238,13 +245,16 @@ def writePVFigure(imagegrains,ColoringArray):
     glyph1Display.PolarAxes.LastRadialAxisTextColor = [0.0, 0.0, 0.0]
     glyph1Display.PolarAxes.SecondaryRadialAxesTextColor = [0.0, 0.0, 0.0]
 
+
+
     # show color bar/color legend
     glyph1Display.SetScalarBarVisibility(renderView1, True)
 
     # update the view to ensure updated data information
     renderView1.Update()
 
-    # reset view to fit data
+    # reset view to fit data and change to correct timeslice
+
     renderView1.ResetCamera()
 
     # Properties modified on glyph1
@@ -272,9 +282,18 @@ def writePVFigure(imagegrains,ColoringArray):
     # current camera placement for renderView1
     renderView1.InteractionMode = '2D'
 
+    #change background color to white
+    renderView1.Background = [1,1,1]
+
     ResetCamera()
     renderView1.CameraParallelScale = 20
     renderView1.Update()
 
+    renderView1.ViewTime = timestep
+    renderView1.StillRender()
+
     # WriteImage("test.png") # deprecated, use SaveScreenshot instead.
     SaveScreenshot("test.png",CompressionLevel=0)
+
+
+#def writeAnimation(imagegrains,ColoringArray):
